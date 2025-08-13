@@ -1,1574 +1,1638 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>LLog</title>
-    <style>
-      :root {
-        --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        --card: rgba(255, 255, 255, 0.85);
-        --card-hover: rgba(255, 255, 255, 0.95);
-        --accent: linear-gradient(135deg, #3b82f6, #1e40af);
-        --accent-light: rgba(59, 130, 246, 0.1);
-        --accent-border: rgba(59, 130, 246, 0.2);
-        --muted: #64748b;
-        --text: #1e293b;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --border: rgba(148, 163, 184, 0.2);
-        --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
-        --shadow-md: 0 8px 25px rgba(15, 23, 42, 0.12);
-        --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.15);
-        --radius: 16px;
-        --radius-sm: 10px;
-        --gap: 18px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LLog</title>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --card: rgba(255, 255, 255, 0.85);
+      --card-hover: rgba(255, 255, 255, 0.95);
+      --accent: linear-gradient(135deg, #3b82f6, #1e40af);
+      --accent-light: rgba(59, 130, 246, 0.1);
+      --accent-border: rgba(59, 130, 246, 0.2);
+      --muted: #64748b;
+      --text: #1e293b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.2);
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 8px 25px rgba(15, 23, 42, 0.12);
+      --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.15);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --gap: 18px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* Layout */
+    .wrap {
+      display: grid;
+      grid-template-columns: 280px 1fr 280px;
+      grid-template-rows: 1fr auto;
+      gap: var(--gap);
+      padding: var(--gap);
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    header {
+      grid-column: 1/-1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      animation: slideDown 0.6s ease-out;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-md);
+      overflow: auto;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.6s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .left {
+      animation-delay: 0.1s;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation-delay: 0.2s;
+    }
+
+    .right {
+      animation-delay: 0.3s;
+    }
+
+    /* Center Editor */
+    .mode-bar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 6px;
+      background: var(--accent-light);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--accent-border);
+    }
+
+    .mode-btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .editor {
+      background: var(--card-hover);
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.7);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px var(--accent-light);
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    textarea.large {
+      min-height: 180px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn.ghost:hover {
+      background: var(--accent-light);
+      color: #3b82f6;
+      border-color: var(--accent-border);
+    }
+
+    /* Lists */
+    .list-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .list-title::before {
+      content: "";
+      width: 4px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .task,
+    .topic {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.7);
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      animation: slideInLeft 0.4s ease-out;
+    }
+
+    .task:hover,
+    .topic:hover {
+      background: var(--card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chk {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      accent-color: var(--success);
+    }
+
+    /* Icons */
+    .more-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+
+    .task:hover .more-btn,
+    .topic:hover .more-btn {
+      opacity: 1;
+    }
+
+    .more-btn:hover {
+      background: white;
+      transform: scale(1.1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Menu */
+    .menu-card {
+      position: fixed;
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      min-width: 180px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .menu-card button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.15s ease;
+    }
+
+    .menu-card button:hover {
+      background: var(--accent-light);
+      color: #3b82f6;
+    }
+
+    /* Timeline */
+    .timeline-bar {
+      grid-column: 1/-1;
+      height: 140px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: slideUp 0.6s ease-out 0.4s both;
+    }
+
+    .timeline-inner {
+      width: 100%;
+      max-width: 1200px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      overflow: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .timeline {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .node {
+      min-width: 200px;
+      flex: 0 0 auto;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: white;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+      animation: scaleIn 0.4s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .node:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: var(--shadow-md);
+      background: var(--card-hover);
+    }
+
+    .node .title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .node time {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .node .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .node:hover .delete-btn {
+      display: flex;
+    }
+
+    .node .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* Header Controls */
+    #searchInput {
+      width: 240px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
       }
 
-      * {
-        box-sizing: border-box;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
       }
 
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        overflow-x: hidden;
-      }
-
-      /* Layout */
-      .wrap {
-        display: grid;
-        grid-template-columns: 280px 1fr 280px;
-        grid-template-rows: 1fr auto;
-        gap: var(--gap);
-        padding: var(--gap);
-        height: 100vh;
-        box-sizing: border-box;
-      }
-
-      header {
-        grid-column: 1/-1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 16px;
-        background: var(--card);
-        border-radius: var(--radius);
-        backdrop-filter: blur(10px);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border);
-        animation: slideDown 0.6s ease-out;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        background: var(--accent);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .panel {
-        background: var(--card);
-        border-radius: var(--radius);
-        padding: 16px;
-        box-shadow: var(--shadow-md);
-        overflow: auto;
-        border: 1px solid var(--border);
-        backdrop-filter: blur(10px);
-        animation: fadeInUp 0.6s ease-out;
-        animation-fill-mode: both;
-      }
-
-      .left {
-        animation-delay: 0.1s;
-      }
-      .center {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        animation-delay: 0.2s;
-      }
-      .right {
-        animation-delay: 0.3s;
-      }
-
-      /* Center Editor */
-      .mode-bar {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        padding: 6px;
-        background: var(--accent-light);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--accent-border);
-      }
-
-      .mode-btn {
-        padding: 10px 16px;
-        border-radius: var(--radius-sm);
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--muted);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .mode-btn:hover {
-        background: rgba(255, 255, 255, 0.5);
-        color: var(--text);
-        transform: translateY(-1px);
-      }
-
-      .mode-btn.active {
-        background: var(--accent);
-        color: white;
-        box-shadow: var(--shadow-sm);
-        transform: translateY(-1px);
-      }
-
-      .editor {
-        background: var(--card-hover);
-        border-radius: var(--radius);
-        padding: 18px;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-sm);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      input,
-      textarea,
-      select {
-        padding: 14px 16px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.7);
-        font-family: inherit;
-        font-size: 14px;
-        transition: all 0.2s ease;
-      }
-
-      input:focus,
-      textarea:focus,
-      select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px var(--accent-light);
-        background: white;
-        transform: translateY(-1px);
-      }
-
-      textarea.large {
-        min-height: 180px;
-        resize: vertical;
-        font-family: inherit;
-      }
-
-      .meta-row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-
-      .actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 8px;
-      }
-
-      .btn {
-        background: var(--accent);
-        color: white;
-        padding: 12px 24px;
-        border-radius: var(--radius-sm);
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-        box-shadow: var(--shadow-sm);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-      }
-
-      .btn:active {
+      to {
+        opacity: 1;
         transform: translateY(0);
       }
+    }
 
-      .btn.ghost {
-        background: transparent;
-        color: var(--muted);
-        border: 1px solid var(--border);
-      }
-
-      .btn.ghost:hover {
-        background: var(--accent-light);
-        color: #3b82f6;
-        border-color: var(--accent-border);
-      }
-
-      /* Lists */
-      .list-title {
-        font-weight: 600;
-        color: var(--text);
-        margin-bottom: 16px;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .list-title::before {
-        content: "";
-        width: 4px;
-        height: 16px;
-        background: var(--accent);
-        border-radius: 2px;
-      }
-
-      .task,
-      .topic {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        border-radius: var(--radius-sm);
-        background: rgba(255, 255, 255, 0.7);
-        margin-bottom: 12px;
-        border: 1px solid var(--border);
-        position: relative;
-        cursor: pointer;
-        animation: slideInLeft 0.4s ease-out;
-      }
-
-      .task:hover,
-      .topic:hover {
-        background: var(--card-hover);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-sm);
-      }
-
-      .item-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .chk {
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        accent-color: var(--success);
-      }
-
-      /* Icons */
-      .more-btn {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
+    @keyframes slideDown {
+      from {
         opacity: 0;
-        transition: all 0.2s ease;
+        transform: translateY(-20px);
       }
 
-      .task:hover .more-btn,
-      .topic:hover .more-btn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1000px) {
+      .wrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .timeline-bar {
+        height: 180px;
+      }
+
+      #searchInput {
+        width: 200px;
+      }
+    }
+
+    /* Scroll styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* Loading states */
+    .loading {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
         opacity: 1;
       }
 
-      .more-btn:hover {
-        background: white;
-        transform: scale(1.1);
-        box-shadow: var(--shadow-sm);
-      }
-
-      /* Menu */
-      .menu-card {
-        position: fixed;
-        background: white;
-        border-radius: var(--radius-sm);
-        padding: 8px;
-        box-shadow: var(--shadow-lg);
-        z-index: 1000;
-        min-width: 180px;
-        border: 1px solid var(--border);
-        animation: fadeIn 0.2s ease-out;
-      }
-
-      .menu-card button {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 10px 12px;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: all 0.15s ease;
-      }
-
-      .menu-card button:hover {
-        background: var(--accent-light);
-        color: #3b82f6;
-      }
-
-      /* Timeline */
-      .timeline-bar {
-        grid-column: 1/-1;
-        height: 140px;
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: slideUp 0.6s ease-out 0.4s both;
-      }
-
-      .timeline-inner {
-        width: 100%;
-        max-width: 1200px;
-        background: var(--card);
-        border-radius: var(--radius);
-        padding: 20px;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-md);
-        overflow: auto;
-        backdrop-filter: blur(10px);
-      }
-
-      .timeline {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        padding: 12px;
-      }
-
-      .node {
-        min-width: 200px;
-        flex: 0 0 auto;
-        padding: 16px;
-        border-radius: var(--radius-sm);
-        background: white;
-        border: 1px solid var(--border);
-        cursor: pointer;
-        position: relative;
-        box-shadow: var(--shadow-sm);
-        animation: scaleIn 0.4s ease-out;
-        animation-fill-mode: both;
-      }
-
-      .node:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: var(--shadow-md);
-        background: var(--card-hover);
-      }
-
-      .node .title {
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 160px;
-        color: var(--text);
-        margin-bottom: 8px;
-      }
-
-      .node time {
-        display: block;
-        font-size: 12px;
-        color: var(--muted);
-        font-weight: 500;
-      }
-
-      .node .delete-btn {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 24px;
-        height: 24px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      }
-
-      .node:hover .delete-btn {
-        display: flex;
-      }
-
-      .node .delete-btn:hover {
-        background: rgba(239, 68, 68, 0.2);
-        transform: scale(1.1);
-      }
-
-      /* Header Controls */
-      #searchInput {
-        width: 240px;
-        padding: 6px 12px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.8);
-        font-size: 14px;
-      }
-
-      /* Animations */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideInLeft {
-        from {
-          opacity: 0;
-          transform: translateX(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes scaleIn {
-        from {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      /* Responsive */
-      @media (max-width: 1000px) {
-        .wrap {
-          grid-template-columns: 1fr;
-          grid-template-rows: auto 1fr auto;
-        }
-        .timeline-bar {
-          height: 180px;
-        }
-        #searchInput {
-          width: 200px;
-        }
-      }
-
-      /* Scroll styling */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: transparent;
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: var(--border);
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: var(--muted);
-      }
-
-      /* Loading states */
-      .loading {
-        animation: pulse 1.5s infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.7;
-        }
-      }
-
-      /* Enhanced focus states */
-      .btn:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px var(--accent-light);
-      }
-
-      /* Status indicators */
-      .task.completed {
+      50% {
         opacity: 0.7;
-        background: rgba(16, 185, 129, 0.05);
       }
+    }
 
-      .topic.completed {
-        opacity: 0.7;
-        background: rgba(16, 185, 129, 0.05);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <h1>✨ LLog</h1>
-        <div style="display: flex; gap: 8px; align-items: center">
-          <input id="searchInput" placeholder="🔍 搜索（按主题或内容）" />
-          <input
-            id="fileImport"
-            type="file"
-            accept="application/json"
-            style="display: none"
-          />
-          <label
-            class="mode-btn"
-            id="btnImportLbl"
-            style="border: 1px solid var(--border); cursor: pointer"
-            >📥 导入 JSON</label
-          >
-          <label
-            class="mode-btn"
-            id="btnExport"
-            style="border: 1px solid var(--border); cursor: pointer"
-            >📤 导出 JSON</label
-          >
-          <label
-            class="mode-btn"
-            id="btnClear"
-            style="border: 1px solid var(--border); cursor: pointer"
-            >🗑️ 清空</label
-          >
-          <!-- <button class="mode-btn" id="btnExport">📤 导出 JSON</button>
+    /* Enhanced focus states */
+    .btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    /* Status indicators */
+    .task.completed {
+      opacity: 0.7;
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .topic.completed {
+      opacity: 0.7;
+      background: rgba(16, 185, 129, 0.05);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>✨ LLog</h1>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <input id="searchInput" placeholder="🔍 搜索（按主题或内容）" />
+        <input id="fileImport" type="file" accept="application/json" style="display: none" />
+        <label class="mode-btn" id="btnImportLbl" style="border: 1px solid var(--border); cursor: pointer">📥 导入
+          JSON</label>
+        <label class="mode-btn" id="btnExport" style="border: 1px solid var(--border); cursor: pointer">📤 导出
+          JSON</label>
+        <label class="mode-btn" id="btnClear" style="border: 1px solid var(--border); cursor: pointer">🗑️ 清空</label>
+        <!-- <button class="mode-btn" id="btnExport">📤 导出 JSON</button>
           <button class="mode-btn" id="btnClear" style="color: var(--danger)">
             🗑️ 清空
           </button> -->
+      </div>
+    </header>
+
+    <!-- left: tasks -->
+    <aside class="panel left">
+      <div class="list-title">📋 计划</div>
+      <div id="taskList"></div>
+    </aside>
+
+    <!-- center: big editor -->
+    <main class="panel center">
+      <div class="mode-bar">
+        <button class="mode-btn active" data-mode="add-event">
+          📅 添加事件
+        </button>
+        <button class="mode-btn" data-mode="add-task">✅ 添加计划</button>
+        <button class="mode-btn" data-mode="add-topic">🏷️ 添加主题</button>
+        <button class="mode-btn" data-mode="edit">✏️ 查看 / 编辑</button>
+        <div style="flex: 1"></div>
+        <div style="color: var(--muted); font-size: 13px; font-weight: 500">
+          💡 点击底部时间轴或侧边项以在此查看/编辑
         </div>
-      </header>
+      </div>
 
-      <!-- left: tasks -->
-      <aside class="panel left">
-        <div class="list-title">📋 计划</div>
-        <div id="taskList"></div>
-      </aside>
-
-      <!-- center: big editor -->
-      <main class="panel center">
-        <div class="mode-bar">
-          <button class="mode-btn active" data-mode="add-event">
-            📅 添加事件
-          </button>
-          <button class="mode-btn" data-mode="add-task">✅ 添加计划</button>
-          <button class="mode-btn" data-mode="add-topic">🏷️ 添加主题</button>
-          <button class="mode-btn" data-mode="edit">✏️ 查看 / 编辑</button>
+      <div class="editor">
+        <input id="itemTitle" placeholder="✏️ 标题（对事件取首行，或主题名/任务标题）" />
+        <textarea id="itemBody" class="large" placeholder="📝 详情或笔记（在这里查看/编辑完整内容）"></textarea>
+        <div class="meta-row">
+          <select id="bodyTopicSelect">
+            <option value="">🏷️ 关联主题（可选）</option>
+          </select>
           <div style="flex: 1"></div>
-          <div style="color: var(--muted); font-size: 13px; font-weight: 500">
-            💡 点击底部时间轴或侧边项以在此查看/编辑
-          </div>
+          <button class="btn" id="saveBtn">💾 保存</button>
+          <button class="btn ghost" id="cancelBtn">❌ 取消</button>
         </div>
+      </div>
+    </main>
 
-        <div class="editor">
-          <input
-            id="itemTitle"
-            placeholder="✏️ 标题（对事件取首行，或主题名/任务标题）"
-          />
-          <textarea
-            id="itemBody"
-            class="large"
-            placeholder="📝 详情或笔记（在这里查看/编辑完整内容）"
-          ></textarea>
-          <div class="meta-row">
-            <select id="bodyTopicSelect">
-              <option value="">🏷️ 关联主题（可选）</option>
-            </select>
-            <div style="flex: 1"></div>
-            <button class="btn" id="saveBtn">💾 保存</button>
-            <button class="btn ghost" id="cancelBtn">❌ 取消</button>
-          </div>
-        </div>
-      </main>
-
-      <!-- right: topics -->
-      <aside class="panel right">
-        <div
-          style="
+    <!-- right: topics -->
+    <aside class="panel right">
+      <div style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
-          "
-        >
-          <div class="list-title">🏷️ 主题</div>
-        </div>
-        <div id="topicList"></div>
-      </aside>
+          ">
+        <div class="list-title">🏷️ 主题</div>
+      </div>
+      <div id="topicList"></div>
+    </aside>
 
-      <!-- bottom timeline -->
-      <div class="timeline-bar">
-        <div class="timeline-inner">
-          <div class="timeline" id="timeline"></div>
-        </div>
+    <!-- bottom timeline -->
+    <div class="timeline-bar">
+      <div class="timeline-inner">
+        <div class="timeline" id="timeline"></div>
       </div>
     </div>
+  </div>
 
-    <script>
-      // state
-      const STORAGE_KEY = "timeline_v3";
-      let state = { events: [], topics: [], tasks: [] };
-      let mode = "add-event"; // modes: add-event, add-task, add-topic, edit
-      let currentEdit = null; // {type:'event'|'topic'|'task', id}
-      let autoSaveTimer = null; // 添加这行
-      let saveStatus = ""; // 添加这行
+  <script>
+    // state
+    const STORAGE_KEY = "timeline_v3";
+    let state = { events: [], topics: [], tasks: [] };
+    let mode = "add-event"; // modes: add-event, add-task, add-topic, edit
+    let currentEdit = null; // {type:'event'|'topic'|'task', id}
+    let autoSaveTimer = null; // 添加这行
+    let saveStatus = ""; // 添加这行
+    let hasUnsavedChanges = false;
+    let hasManualSaved = false;
 
-      // utils
-      const uid = () =>
-        Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-      const nowISO = () => new Date().toISOString();
-      function save() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      }
-      function load() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw)
-          try {
-            state = JSON.parse(raw);
-          } catch (e) {
-            console.error(e);
-          }
-        state.events = state.events || [];
-        state.topics = state.topics || [];
-        state.tasks = state.tasks || [];
-      }
+    // utils
+    const uid = () =>
+      Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const nowISO = () => new Date().toISOString();
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    function load() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw)
+        try {
+          state = JSON.parse(raw);
+        } catch (e) {
+          console.error(e);
+        }
+      state.events = state.events || [];
+      state.topics = state.topics || [];
+      state.tasks = state.tasks || [];
+    }
 
-      // small html escaper for safety when inserting innerHTML
-      function escapeHtml(s) {
-        return String(s || "").replace(
-          /[&<>\"]/g,
-          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
-        );
-      }
+    // small html escaper for safety when inserting innerHTML
+    function escapeHtml(s) {
+      return String(s || "").replace(
+        /[&<>\"]/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
+      );
+    }
 
-      // dom refs
-      const taskList = document.getElementById("taskList");
-      const topicList = document.getElementById("topicList");
-      const timelineEl = document.getElementById("timeline");
-      const titleInput = document.getElementById("itemTitle");
-      const bodyInput = document.getElementById("itemBody");
-      const topicSelect = document.getElementById("bodyTopicSelect");
-      const saveBtn = document.getElementById("saveBtn");
-      const cancelBtn = document.getElementById("cancelBtn");
-      const fileImport = document.getElementById("fileImport");
-      const searchInput = document.getElementById("searchInput");
+    // dom refs
+    const taskList = document.getElementById("taskList");
+    const topicList = document.getElementById("topicList");
+    const timelineEl = document.getElementById("timeline");
+    const titleInput = document.getElementById("itemTitle");
+    const bodyInput = document.getElementById("itemBody");
+    const topicSelect = document.getElementById("bodyTopicSelect");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const fileImport = document.getElementById("fileImport");
+    const searchInput = document.getElementById("searchInput");
 
-      // initial load
-      load();
-      renderAll();
+    // initial load
+    load();
+    renderAll();
+    populateTopicSelect();
+
+    // render
+    function renderAll() {
+      renderTasks();
+      renderTopics();
+      renderTimeline();
       populateTopicSelect();
+    }
 
-      // render
-      function renderAll() {
-        renderTasks();
-        renderTopics();
-        renderTimeline();
-        populateTopicSelect();
+    function reorderListByCheck(listName, id, checked) {
+      const arr = state[listName];
+      const idx = arr.findIndex((x) => x.id === id);
+      if (idx === -1) return;
+      const item = arr.splice(idx, 1)[0];
+      item.done = !!checked;
+      if (item.done) {
+        // move after last unchecked
+        const countUnchecked = arr.filter((x) => !x.done).length;
+        arr.splice(countUnchecked, 0, item);
+      } else {
+        // move before first checked (or to start)
+        const firstChecked = arr.findIndex((x) => x.done);
+        const insertIndex = firstChecked === -1 ? 0 : firstChecked;
+        arr.splice(insertIndex, 0, item);
       }
+      save();
+      renderAll();
+    }
 
-      function reorderListByCheck(listName, id, checked) {
-        const arr = state[listName];
-        const idx = arr.findIndex((x) => x.id === id);
-        if (idx === -1) return;
-        const item = arr.splice(idx, 1)[0];
-        item.done = !!checked;
-        if (item.done) {
-          // move after last unchecked
-          const countUnchecked = arr.filter((x) => !x.done).length;
-          arr.splice(countUnchecked, 0, item);
-        } else {
-          // move before first checked (or to start)
-          const firstChecked = arr.findIndex((x) => x.done);
-          const insertIndex = firstChecked === -1 ? 0 : firstChecked;
-          arr.splice(insertIndex, 0, item);
-        }
-        save();
-        renderAll();
-      }
+    function renderTasks() {
+      taskList.innerHTML = "";
+      state.tasks.forEach((t, idx) => {
+        const div = document.createElement("div");
+        div.className = "task" + (t.done ? " completed" : "");
+        div.style.animationDelay = `${idx * 0.1}s`;
 
-      function renderTasks() {
-        taskList.innerHTML = "";
-        state.tasks.forEach((t, idx) => {
-          const div = document.createElement("div");
-          div.className = "task" + (t.done ? " completed" : "");
-          div.style.animationDelay = `${idx * 0.1}s`;
+        const left = document.createElement("div");
+        left.className = "item-left";
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.className = "chk";
+        chk.checked = !!t.done;
+        chk.onchange = () => {
+          reorderListByCheck("tasks", t.id, chk.checked);
+        };
+        const txt = document.createElement("div");
+        txt.innerHTML = `<div style="font-weight:500">${escapeHtml(
+          t.text
+        )}</div>`;
+        left.appendChild(chk);
+        left.appendChild(txt);
+        div.appendChild(left);
 
-          const left = document.createElement("div");
-          left.className = "item-left";
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.className = "chk";
-          chk.checked = !!t.done;
-          chk.onchange = () => {
-            reorderListByCheck("tasks", t.id, chk.checked);
-          };
-          const txt = document.createElement("div");
-          txt.innerHTML = `<div style="font-weight:500">${escapeHtml(
-            t.text
-          )}</div>`;
-          left.appendChild(chk);
-          left.appendChild(txt);
-          div.appendChild(left);
+        // more menu
+        const mBtn = document.createElement("div");
+        mBtn.className = "more-btn";
+        mBtn.innerHTML = "⋮";
+        div.appendChild(mBtn);
+        taskList.appendChild(div);
 
-          // more menu
-          const mBtn = document.createElement("div");
-          mBtn.className = "more-btn";
-          mBtn.innerHTML = "⋮";
-          div.appendChild(mBtn);
-          taskList.appendChild(div);
+        // clicking the task loads into editor
+        div.onclick = (e) => {
+          if (
+            e.target.type === "checkbox" ||
+            e.target.classList.contains("more-btn") ||
+            e.target.closest(".more-btn")
+          )
+            return;
+          mode = "edit";
+          currentEdit = { type: "task", id: t.id };
+          setModeButton();
+          loadIntoEditor("task", t.id);
+        };
 
-          // clicking the task loads into editor
-          div.onclick = (e) => {
-            if (
-              e.target.type === "checkbox" ||
-              e.target.classList.contains("more-btn") ||
-              e.target.closest(".more-btn")
-            )
-              return;
-            mode = "edit";
-            currentEdit = { type: "task", id: t.id };
-            setModeButton();
-            loadIntoEditor("task", t.id);
-          };
-
-          // menu actions
-          mBtn.onclick = (e) => {
-            openMenuForElement(
-              mBtn,
-              [
-                {
-                  label: "📌 置顶",
-                  action: () => {
+        // menu actions
+        mBtn.onclick = (e) => {
+          openMenuForElement(
+            mBtn,
+            [
+              {
+                label: "📌 置顶",
+                action: () => {
+                  state.tasks.splice(idx, 1);
+                  state.tasks.unshift(t);
+                  save();
+                  renderAll();
+                },
+              },
+              {
+                label: "📍 置底",
+                action: () => {
+                  state.tasks.splice(idx, 1);
+                  state.tasks.push(t);
+                  save();
+                  renderAll();
+                },
+              },
+              {
+                label: "⬆️ 上移",
+                action: () => {
+                  if (idx > 0) {
                     state.tasks.splice(idx, 1);
-                    state.tasks.unshift(t);
+                    state.tasks.splice(idx - 1, 0, t);
                     save();
                     renderAll();
-                  },
+                  }
                 },
-                {
-                  label: "📍 置底",
-                  action: () => {
+              },
+              {
+                label: "⬇️ 下移",
+                action: () => {
+                  if (idx < state.tasks.length - 1) {
                     state.tasks.splice(idx, 1);
-                    state.tasks.push(t);
+                    state.tasks.splice(idx + 1, 0, t);
                     save();
                     renderAll();
-                  },
+                  }
                 },
-                {
-                  label: "⬆️ 上移",
-                  action: () => {
-                    if (idx > 0) {
-                      state.tasks.splice(idx, 1);
-                      state.tasks.splice(idx - 1, 0, t);
-                      save();
-                      renderAll();
+              },
+              {
+                label: "✏️ 编辑",
+                action: () => {
+                  mode = "edit";
+                  currentEdit = { type: "task", id: t.id };
+                  setModeButton();
+                  loadIntoEditor("task", t.id);
+                },
+              },
+              {
+                label: "🗑️ 删除",
+                action: () => {
+                  if (confirm("删除任务？")) {
+                    state.tasks = state.tasks.filter((x) => x.id !== t.id);
+                    // 如果当前正在编辑这个任务，清空编辑器
+                    if (
+                      currentEdit &&
+                      currentEdit.type === "task" &&
+                      currentEdit.id === t.id
+                    ) {
+                      clearEditor();
                     }
-                  },
+                    save();
+                    renderAll();
+                  }
                 },
-                {
-                  label: "⬇️ 下移",
-                  action: () => {
-                    if (idx < state.tasks.length - 1) {
-                      state.tasks.splice(idx, 1);
-                      state.tasks.splice(idx + 1, 0, t);
-                      save();
-                      renderAll();
-                    }
-                  },
+              },
+            ],
+            e
+          );
+        };
+      });
+    }
+
+    function renderTopics() {
+      topicList.innerHTML = "";
+      state.topics.forEach((t, idx) => {
+        const box = document.createElement("div");
+        box.className = "topic" + (t.done ? " completed" : "");
+        box.style.animationDelay = `${idx * 0.1}s`;
+
+        const left = document.createElement("div");
+        left.className = "item-left";
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.className = "chk";
+        chk.checked = !!t.done;
+        chk.onchange = () => {
+          reorderListByCheck("topics", t.id, chk.checked);
+        };
+        const h = document.createElement("h4");
+        h.textContent = t.name;
+        h.style.margin = "0";
+        h.style.fontSize = "14px";
+        h.style.fontWeight = "500";
+        left.appendChild(chk);
+        left.appendChild(h);
+        box.appendChild(left);
+
+        // click title -> view/edit
+        box.onclick = (e) => {
+          if (
+            e.target.type === "checkbox" ||
+            e.target.classList.contains("more-btn") ||
+            e.target.closest(".more-btn")
+          )
+            return;
+          mode = "edit";
+          currentEdit = { type: "topic", id: t.id };
+          setModeButton();
+          loadIntoEditor("topic", t.id);
+        };
+        const mBtn = document.createElement("div");
+        mBtn.className = "more-btn";
+        mBtn.innerHTML = "⋮";
+        box.appendChild(mBtn);
+        topicList.appendChild(box);
+
+        // menu actions
+        mBtn.onclick = (e) => {
+          openMenuForElement(
+            mBtn,
+            [
+              {
+                label: "📌 置顶",
+                action: () => {
+                  state.topics.splice(idx, 1);
+                  state.topics.unshift(t);
+                  save();
+                  renderAll();
                 },
-                {
-                  label: "✏️ 编辑",
-                  action: () => {
-                    mode = "edit";
-                    currentEdit = { type: "task", id: t.id };
-                    setModeButton();
-                    loadIntoEditor("task", t.id);
-                  },
+              },
+              {
+                label: "📍 置底",
+                action: () => {
+                  state.topics.splice(idx, 1);
+                  state.topics.push(t);
+                  save();
+                  renderAll();
                 },
-                {
-                  label: "🗑️ 删除",
-                  action: () => {
-                    if (confirm("删除任务？")) {
-                      state.tasks = state.tasks.filter((x) => x.id !== t.id);
-                      // 如果当前正在编辑这个任务，清空编辑器
-                      if (
-                        currentEdit &&
-                        currentEdit.type === "task" &&
-                        currentEdit.id === t.id
-                      ) {
-                        clearEditor();
-                      }
-                      save();
-                      renderAll();
-                    }
-                  },
-                },
-              ],
-              e
-            );
-          };
-        });
-      }
-
-      function renderTopics() {
-        topicList.innerHTML = "";
-        state.topics.forEach((t, idx) => {
-          const box = document.createElement("div");
-          box.className = "topic" + (t.done ? " completed" : "");
-          box.style.animationDelay = `${idx * 0.1}s`;
-
-          const left = document.createElement("div");
-          left.className = "item-left";
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.className = "chk";
-          chk.checked = !!t.done;
-          chk.onchange = () => {
-            reorderListByCheck("topics", t.id, chk.checked);
-          };
-          const h = document.createElement("h4");
-          h.textContent = t.name;
-          h.style.margin = "0";
-          h.style.fontSize = "14px";
-          h.style.fontWeight = "500";
-          left.appendChild(chk);
-          left.appendChild(h);
-          box.appendChild(left);
-
-          // click title -> view/edit
-          box.onclick = (e) => {
-            if (
-              e.target.type === "checkbox" ||
-              e.target.classList.contains("more-btn") ||
-              e.target.closest(".more-btn")
-            )
-              return;
-            mode = "edit";
-            currentEdit = { type: "topic", id: t.id };
-            setModeButton();
-            loadIntoEditor("topic", t.id);
-          };
-          const mBtn = document.createElement("div");
-          mBtn.className = "more-btn";
-          mBtn.innerHTML = "⋮";
-          box.appendChild(mBtn);
-          topicList.appendChild(box);
-
-          // menu actions
-          mBtn.onclick = (e) => {
-            openMenuForElement(
-              mBtn,
-              [
-                {
-                  label: "📌 置顶",
-                  action: () => {
+              },
+              {
+                label: "⬆️ 上移",
+                action: () => {
+                  if (idx > 0) {
                     state.topics.splice(idx, 1);
-                    state.topics.unshift(t);
+                    state.topics.splice(idx - 1, 0, t);
                     save();
                     renderAll();
-                  },
+                  }
                 },
-                {
-                  label: "📍 置底",
-                  action: () => {
+              },
+              {
+                label: "⬇️ 下移",
+                action: () => {
+                  if (idx < state.topics.length - 1) {
                     state.topics.splice(idx, 1);
-                    state.topics.push(t);
+                    state.topics.splice(idx + 1, 0, t);
                     save();
                     renderAll();
-                  },
+                  }
                 },
-                {
-                  label: "⬆️ 上移",
-                  action: () => {
-                    if (idx > 0) {
-                      state.topics.splice(idx, 1);
-                      state.topics.splice(idx - 1, 0, t);
-                      save();
-                      renderAll();
+              },
+              {
+                label: "✏️ 重命名/编辑笔记",
+                action: () => {
+                  mode = "edit";
+                  currentEdit = { type: "topic", id: t.id };
+                  setModeButton();
+                  loadIntoEditor("topic", t.id);
+                },
+              },
+              {
+                label: "🗑️ 删除",
+                action: () => {
+                  if (confirm("删除主题？对应事件将取消关联")) {
+                    state.topics = state.topics.filter((x) => x.id !== t.id);
+                    state.events.forEach((ev) => {
+                      if (ev.topic === t.id) ev.topic = null;
+                    });
+                    // 如果当前正在编辑这个主题，清空编辑器
+                    if (
+                      currentEdit &&
+                      currentEdit.type === "topic" &&
+                      currentEdit.id === t.id
+                    ) {
+                      clearEditor();
                     }
-                  },
+                    save();
+                    renderAll();
+                  }
                 },
-                {
-                  label: "⬇️ 下移",
-                  action: () => {
-                    if (idx < state.topics.length - 1) {
-                      state.topics.splice(idx, 1);
-                      state.topics.splice(idx + 1, 0, t);
-                      save();
-                      renderAll();
-                    }
-                  },
-                },
-                {
-                  label: "✏️ 重命名/编辑笔记",
-                  action: () => {
-                    mode = "edit";
-                    currentEdit = { type: "topic", id: t.id };
-                    setModeButton();
-                    loadIntoEditor("topic", t.id);
-                  },
-                },
-                {
-                  label: "🗑️ 删除",
-                  action: () => {
-                    if (confirm("删除主题？对应事件将取消关联")) {
-                      state.topics = state.topics.filter((x) => x.id !== t.id);
-                      state.events.forEach((ev) => {
-                        if (ev.topic === t.id) ev.topic = null;
-                      });
-                      // 如果当前正在编辑这个主题，清空编辑器
-                      if (
-                        currentEdit &&
-                        currentEdit.type === "topic" &&
-                        currentEdit.id === t.id
-                      ) {
-                        clearEditor();
-                      }
-                      save();
-                      renderAll();
-                    }
-                  },
-                },
-              ],
-              e
-            );
-          };
-        });
-      }
+              },
+            ],
+            e
+          );
+        };
+      });
+    }
 
-      function renderTimeline() {
-        timelineEl.innerHTML = "";
-        // filtering by search
-        const q = (searchInput.value || "").trim().toLowerCase();
-        const list = state.events.filter((ev) => {
-          if (!q) return true;
-          const txt = (ev.text || "").toLowerCase();
-          const topicName = ev.topic
-            ? (
-                state.topics.find((t) => t.id === ev.topic) || { name: "" }
-              ).name.toLowerCase()
-            : "";
-          return txt.includes(q) || topicName.includes(q);
-        });
+    function renderTimeline() {
+      timelineEl.innerHTML = '';
 
-        // show each event as node with first line/title
-        list.sort((a, b) => new Date(a.ts) - new Date(b.ts));
-        list.forEach((ev, idx) => {
-          const node = document.createElement("div");
-          node.className = "node";
-          node.style.animationDelay = `${idx * 0.1}s`;
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const list = state.events.filter(ev => {
+        if (!q) return true;
+        const txt = (ev.text || '').toLowerCase();
+        const topicName = ev.topic ?
+          (state.topics.find(t => t.id === ev.topic) || { name: '' }).name.toLowerCase() : '';
+        return txt.includes(q) || topicName.includes(q);
+      });
 
-          const firstLine = (ev.text || "").split(/\n/)[0];
-          const title = document.createElement("div");
-          title.className = "title";
-          title.textContent = firstLine || "(无内容)";
+      // show each event as node with first line/title
+      list.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+      list.forEach((ev, idx) => {
+        const node = document.createElement("div");
+        node.className = "node";
+        node.style.animationDelay = `${idx * 0.1}s`;
 
-          const timeEl = document.createElement("time");
-          timeEl.textContent = new Date(ev.ts).toLocaleString();
+        const firstLine = (ev.text || "").split(/\n/)[0];
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = firstLine || "(无内容)";
 
-          // 创建删除按钮
-          const deleteBtn = document.createElement("button");
-          deleteBtn.innerHTML = "×";
-          deleteBtn.className = "delete-btn";
+        const timeEl = document.createElement("time");
+        timeEl.textContent = new Date(ev.ts).toLocaleString();
 
-          // 删除按钮点击事件
-          deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (confirm("确认删除这个事件？")) {
-              state.events = state.events.filter((event) => event.id !== ev.id);
-              save();
-              renderAll();
-              if (
-                currentEdit &&
-                currentEdit.type === "event" &&
-                currentEdit.id === ev.id
-              ) {
-                clearEditor();
-              }
-            }
-          };
+        // 创建删除按钮
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = "×";
+        deleteBtn.className = "delete-btn";
 
-          node.appendChild(title);
-          node.appendChild(timeEl);
-          node.appendChild(deleteBtn);
-          timelineEl.appendChild(node);
-
-          node.onclick = () => {
-            mode = "edit";
-            currentEdit = { type: "event", id: ev.id };
-            setModeButton();
-            loadIntoEditor("event", ev.id);
-            node.scrollIntoView({ behavior: "smooth", inline: "center" });
-          };
-        });
-      }
-
-      function populateTopicSelect() {
-        topicSelect.innerHTML = '<option value="">🏷️ (不关联)</option>';
-        state.topics
-          .filter((t) => t.done !== true)
-          .forEach((t) => {
-            const o = document.createElement("option");
-            o.value = t.id;
-            o.textContent = t.name;
-            topicSelect.appendChild(o);
-          });
-      }
-
-      // editor logic
-      function clearEditor() {
-        // 清除自动保存定时器
-        if (autoSaveTimer) {
-          clearTimeout(autoSaveTimer);
-          autoSaveTimer = null;
-        }
-
-        titleInput.value = "";
-        bodyInput.value = "";
-        topicSelect.value = "";
-        currentEdit = null;
-        saveStatus = "";
-        updateSaveButton();
-      }
-
-      // 防抖自动保存函数
-      function autoSave() {
-        if (autoSaveTimer) clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(() => {
-          if (mode === "edit" && currentEdit) {
-            performSave(true); // true表示自动保存
-          }
-        }, 10000); // 10秒延迟
-      }
-
-      // 执行保存的核心函数
-      function performSave(isAutoSave = false) {
-        const title = titleInput.value.trim();
-        const body = bodyInput.value.trim();
-        const topicId = topicSelect.value || null;
-
-        if (mode === "edit" && currentEdit) {
-          if (!title && !body) return; // 空内容不保存
-
-          try {
-            if (currentEdit.type === "event") {
-              const ev = state.events.find((x) => x.id === currentEdit.id);
-              if (!ev) return;
-              if (!title) {
-                if (isAutoSave) return; // 自动保存时标题为空则跳过
-                alert("请输入事件标题");
-                return;
-              }
-              const text = title + (body ? "\n" + body : "");
-              ev.text = text;
-              ev.topic = topicId || null;
-            }
-
-            if (currentEdit.type === "topic") {
-              const t = state.topics.find((x) => x.id === currentEdit.id);
-              if (!t) return;
-              if (!title) {
-                if (isAutoSave) return;
-                alert("请输入主题名");
-                return;
-              }
-              // 检查重名
-              if (title.toLowerCase() !== t.name.trim().toLowerCase()) {
-                const exists = state.topics.find(
-                  (x) => x.name.trim().toLowerCase() === title.toLowerCase()
-                );
-                if (exists) {
-                  if (isAutoSave) return;
-                  alert("存在同名主题");
-                  return;
-                }
-                t.name = title.trim();
-              }
-              t.notes = body;
-            }
-
-            if (currentEdit.type === "task") {
-              const tk = state.tasks.find((x) => x.id === currentEdit.id);
-              if (!tk) return;
-              if (!title) {
-                if (isAutoSave) return;
-                alert("请输入任务标题");
-                return;
-              }
-              tk.text = title;
-              tk.notes = body;
-            }
-
+        // 删除按钮点击事件
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          if (confirm("确认删除这个事件？")) {
+            state.events = state.events.filter((event) => event.id !== ev.id);
             save();
             renderAll();
-            showSaveStatus(isAutoSave ? "已自动保存" : "已保存");
-          } catch (error) {
-            console.error("保存失败:", error);
-            if (!isAutoSave) alert("保存失败");
-          }
-        }
-      }
-
-      // 显示保存状态
-      function showSaveStatus(message) {
-        saveStatus = message;
-        updateSaveButton();
-        setTimeout(() => {
-          saveStatus = "";
-          updateSaveButton();
-        }, 2000);
-      }
-
-      // 更新保存按钮显示
-      function updateSaveButton() {
-        if (saveStatus) {
-          saveBtn.textContent = saveStatus;
-          saveBtn.style.background = "var(--success)";
-        } else {
-          saveBtn.textContent = "💾 保存";
-          saveBtn.style.background = "var(--accent)";
-        }
-      }
-
-      function loadIntoEditor(type, id) {
-        if (type === "event") {
-          const ev = state.events.find((x) => x.id === id);
-          if (!ev) return;
-          const lines = (ev.text || "").split(/\n/);
-          titleInput.value = lines[0] || "";
-          bodyInput.value = lines.slice(1).join("\n"); // 只取第二行开始的内容作为详情
-          topicSelect.value = ev.topic || "";
-        }
-        if (type === "topic") {
-          const t = state.topics.find((x) => x.id === id);
-          if (!t) return;
-          titleInput.value = t.name;
-          bodyInput.value = t.notes || "";
-          topicSelect.value = "";
-        }
-        if (type === "task") {
-          const tk = state.tasks.find((x) => x.id === id);
-          if (!tk) return;
-          titleInput.value = tk.text;
-          bodyInput.value = tk.notes || "";
-          topicSelect.value = "";
-        }
-      }
-
-      // save handler
-      saveBtn.onclick = () => {
-        const title = titleInput.value.trim();
-        const body = bodyInput.value.trim();
-        const topicId = topicSelect.value || null;
-
-        if (mode === "add-event") {
-          if (!title) {
-            alert("请输入事件标题");
-            return;
-          }
-          const text = title + (body ? "\n" + body : "");
-          addEvent(text, nowISO(), topicId);
-          clearEditor();
-          showSaveStatus("事件已添加");
-        } else if (mode === "add-task") {
-          if (!title) {
-            alert("请输入任务标题");
-            return;
-          }
-          const taskId = addTask(title);
-          if (body) {
-            const task = state.tasks.find((t) => t.id === taskId);
-            if (task) {
-              task.notes = body;
-              save();
+            if (
+              currentEdit &&
+              currentEdit.type === "event" &&
+              currentEdit.id === ev.id
+            ) {
+              clearEditor();
             }
           }
-          clearEditor();
-          showSaveStatus("任务已添加");
-        } else if (mode === "add-topic") {
-          if (!title) {
-            alert("请输入主题名");
-            return;
-          }
-          const res = addTopic(title);
-          if (!res.ok) {
-            alert(res.msg);
-            return;
-          }
-          updateTopic(res.t.id, { notes: body });
-          clearEditor();
-          showSaveStatus("主题已添加");
-        } else {
-          performSave(false); // 手动保存
-        }
-      };
-
-      cancelBtn.onclick = () => {
-        clearEditor();
-      };
-
-      // helper: add functions that update state and render
-      function addEvent(text, ts = null, topic = null) {
-        const ev = {
-          id: uid(),
-          ts: ts || nowISO(),
-          text: text,
-          topic: topic || null,
         };
-        state.events.push(ev);
-        save();
-        renderAll();
+
+        node.appendChild(title);
+        node.appendChild(timeEl);
+        node.appendChild(deleteBtn);
+        timelineEl.appendChild(node);
+
+        node.onclick = () => {
+          mode = "edit";
+          currentEdit = { type: "event", id: ev.id };
+          setModeButton();
+          loadIntoEditor("event", ev.id);
+          node.scrollIntoView({ behavior: "smooth", inline: "center" });
+        };
+      });
+    }
+
+    function populateTopicSelect() {
+      topicSelect.innerHTML = '<option value="">🏷️ (不关联)</option>';
+      state.topics
+        .filter((t) => t.done !== true)
+        .forEach((t) => {
+          const o = document.createElement("option");
+          o.value = t.id;
+          o.textContent = t.name;
+          topicSelect.appendChild(o);
+        });
+    }
+
+    // editor logic
+    function clearEditor() {
+      titleInput.value = '';
+      bodyInput.value = '';
+      topicSelect.value = '';
+      currentEdit = null;
+      hasUnsavedChanges = false;
+      hasManualSaved = false;
+    }
+
+    function loadIntoEditor(type, id) {
+      if (type === 'event') {
+        const ev = state.events.find(x => x.id === id);
+        if (!ev) return;
+        titleInput.value = (ev.text || '').split(/\n/)[0];
+        bodyInput.value = ev.text;
+        topicSelect.value = ev.topic || '';
       }
-      function addTask(text) {
-        const id = uid();
-        state.tasks.push({ id, text, notes: "", done: false });
-        save();
-        renderAll();
-        return id;
-      }
-      function addTopic(name) {
-        if (!name) return { ok: false, msg: "名称为空" };
-        const exists = state.topics.find(
-          (t) => t.name.trim().toLowerCase() === name.trim().toLowerCase()
-        );
-        if (exists) return { ok: false, msg: "主题已存在" };
-        const t = { id: uid(), name: name.trim(), notes: "", done: false };
-        state.topics.push(t);
-        save();
-        renderAll();
-        return { ok: true, t };
-      }
-      function updateTopic(id, data) {
-        const t = state.topics.find((x) => x.id === id);
+      if (type === 'topic') {
+        const t = state.topics.find(x => x.id === id);
         if (!t) return;
-        Object.assign(t, data);
-        save();
-        renderAll();
+        titleInput.value = t.name;
+        bodyInput.value = t.notes || '';
+        topicSelect.value = '';
+      }
+      if (type === 'task') {
+        const tk = state.tasks.find(x => x.id === id);
+        if (!tk) return;
+        titleInput.value = tk.text;
+        bodyInput.value = '';
+        topicSelect.value = '';
       }
 
-      // open contextual menu below an element (improved toggle + auto-close)
-      function openMenuForElement(anchor, items, event) {
-        // items: [{label,action}]
-        // if there is already a menu inside this parent, toggle it off
-        const parent = anchor.parentElement;
-        const existing = parent.querySelector(".menu-card");
-        if (existing) {
-          existing.remove();
+      // 记录初始值用于变化检测
+      hasUnsavedChanges = false;
+      hasManualSaved = false;
+    }
+
+    function setupAutoSaveDetection() {
+      let originalTitle = '';
+      let originalBody = '';
+      let originalTopic = '';
+
+      // 记录初始值
+      function recordInitialValues() {
+        originalTitle = titleInput.value;
+        originalBody = bodyInput.value;
+        originalTopic = topicSelect.value;
+        hasUnsavedChanges = false;
+        hasManualSaved = false;
+      }
+
+      // 检测是否有变化
+      function detectChanges() {
+        const hasChanges =
+          titleInput.value !== originalTitle ||
+          bodyInput.value !== originalBody ||
+          topicSelect.value !== originalTopic;
+
+        hasUnsavedChanges = hasChanges && !hasManualSaved;
+        return hasChanges;
+      }
+
+      // 监听输入变化
+      titleInput.addEventListener('input', detectChanges);
+      bodyInput.addEventListener('input', detectChanges);
+      topicSelect.addEventListener('change', detectChanges);
+
+      return { recordInitialValues, detectChanges };
+    }
+
+    // 3. 自动保存函数
+    function autoSave() {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        if (mode === "edit" && currentEdit) {
+          performSave(true); // true表示自动保存
+        }
+      }, 10000); // 10秒延迟
+    }
+
+    // 执行保存的核心函数
+    function performSave(isAutoSave = false) {
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      const topicId = topicSelect.value || null;
+
+      if (mode === "edit" && currentEdit) {
+        if (!title && !body) return; // 空内容不保存
+
+        try {
+          if (currentEdit.type === "event") {
+            const ev = state.events.find((x) => x.id === currentEdit.id);
+            if (!ev) return;
+            if (!title) {
+              if (isAutoSave) return; // 自动保存时标题为空则跳过
+              alert("请输入事件标题");
+              return;
+            }
+            const text = title + (body ? "\n" + body : "");
+            ev.text = text;
+            ev.topic = topicId || null;
+          }
+
+          if (currentEdit.type === "topic") {
+            const t = state.topics.find((x) => x.id === currentEdit.id);
+            if (!t) return;
+            if (!title) {
+              if (isAutoSave) return;
+              alert("请输入主题名");
+              return;
+            }
+            // 检查重名
+            if (title.toLowerCase() !== t.name.trim().toLowerCase()) {
+              const exists = state.topics.find(
+                (x) => x.name.trim().toLowerCase() === title.toLowerCase()
+              );
+              if (exists) {
+                if (isAutoSave) return;
+                alert("存在同名主题");
+                return;
+              }
+              t.name = title.trim();
+            }
+            t.notes = body;
+          }
+
+          if (currentEdit.type === "task") {
+            const tk = state.tasks.find((x) => x.id === currentEdit.id);
+            if (!tk) return;
+            if (!title) {
+              if (isAutoSave) return;
+              alert("请输入任务标题");
+              return;
+            }
+            tk.text = title;
+            tk.notes = body;
+          }
+
+          save();
+          renderAll();
+          showSaveStatus(isAutoSave ? "已自动保存" : "已保存");
+        } catch (error) {
+          console.error("保存失败:", error);
+          if (!isAutoSave) alert("保存失败");
+        }
+      }
+    }
+
+    // 显示保存状态
+    function showSaveStatus(message) {
+      saveStatus = message;
+      updateSaveButton();
+      setTimeout(() => {
+        saveStatus = "";
+        updateSaveButton();
+      }, 2000);
+    }
+
+    // 更新保存按钮显示
+    function updateSaveButton() {
+      if (saveStatus) {
+        saveBtn.textContent = saveStatus;
+        saveBtn.style.background = "var(--success)";
+      } else {
+        saveBtn.textContent = "💾 保存";
+        saveBtn.style.background = "var(--accent)";
+      }
+    }
+
+    // save handler
+    const originalSaveBtn = saveBtn.onclick;
+    saveBtn.onclick = async () => {
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      const topicId = topicSelect.value || null;
+
+      if (mode === 'add-event') {
+        if (!body && !title) {
+          alert('请输入事件内容');
           return;
         }
-        // close any other menus
-        document.querySelectorAll(".menu-card").forEach((n) => n.remove());
-        if (event) {
-          event.stopPropagation();
+        const text = body || title;
+        addEvent(text, nowISO(), topicId);
+        clearEditor();
+      } else if (mode === 'add-task') {
+        if (!title) {
+          alert('请输入任务标题');
+          return;
         }
-        const card = document.createElement("div");
-        card.className = "menu-card";
-        card.onclick = (e) => {
-          e.stopPropagation();
-        }; // prevent outside click closing when interacting with menu
-        items.forEach((it) => {
-          const btn = document.createElement("button");
-          btn.textContent = it.label;
-          btn.onclick = (() => {
-            return () => {
-              try {
-                it.action();
-              } catch (e) {
-                console.error(e);
-              }
-              card.remove();
-            };
-          })();
-          card.appendChild(btn);
-        });
-        // attach to the anchor's parent so it stays within panel
-        // 将菜单添加到body，避免父元素事件影响
-        // 先添加到body以便测量实际高度
-        document.body.appendChild(card);
-
-        // 重新计算位置，相对于页面定位
-        const rect = anchor.getBoundingClientRect();
-        card.style.position = "fixed";
-        card.style.left = rect.right - 180 + "px";
-
-        // 获取菜单实际高度
-        const menuHeight = card.offsetHeight;
-        const spaceBelow = window.innerHeight - rect.bottom - 10; // 留10px缓冲
-        const spaceAbove = rect.top - 10;
-
-        if (spaceBelow < menuHeight && spaceAbove >= menuHeight) {
-          // 向上展开
-          card.style.top = rect.top - menuHeight - 5 + "px";
-        } else {
-          // 向下展开
-          card.style.top = rect.bottom + 5 + "px";
+        addTask(title);
+        clearEditor();
+      } else if (mode === 'add-topic') {
+        if (!title) {
+          alert('请输入主题名');
+          return;
+        }
+        const res = addTopic(title);
+        if (!res.ok) {
+          alert(res.msg);
+          return;
+        }
+        updateTopic(res.t.id, { notes: body });
+        clearEditor();
+      } else if (mode === 'edit') {
+        if (!currentEdit) {
+          alert('未选择要编辑的条目');
+          return;
+        }
+        if (currentEdit.type === 'event') {
+          const ev = state.events.find(x => x.id === currentEdit.id);
+          if (!ev) return;
+          ev.text = body || title;
+          ev.topic = topicId || null;
+          await save();
+          renderAll();
+        }
+        if (currentEdit.type === 'topic') {
+          const t = state.topics.find(x => x.id === currentEdit.id);
+          if (!t) return;
+          if (title.trim().toLowerCase() !== t.name.trim().toLowerCase()) {
+            const exists = state.topics.find(x =>
+              x.name.trim().toLowerCase() === title.trim().toLowerCase()
+            );
+            if (exists) {
+              alert('存在同名主题');
+              return;
+            }
+            t.name = title.trim();
+          }
+          t.notes = body;
+          await save();
+          renderAll();
+        }
+        if (currentEdit.type === 'task') {
+          const tk = state.tasks.find(x => x.id === currentEdit.id);
+          if (!tk) return;
+          tk.text = title;
+          await save();
+          renderAll();
         }
       }
 
-      // close menus when clicking outside
-      document.addEventListener("click", (e) => {
-        // 如果点击的不是菜单内容，则关闭菜单
-        if (!e.target.closest(".menu-card") && !e.target.closest(".more-btn")) {
-          document.querySelectorAll(".menu-card").forEach((n) => n.remove());
+      hasManualSaved = true; // 标记已手动保存
+      hasUnsavedChanges = false;
+    };
+
+
+    cancelBtn.onclick = () => {
+      clearEditor();
+    };
+
+    // helper: add functions that update state and render
+    function addEvent(text, ts = null, topic = null) {
+      const ev = {
+        id: uid(),
+        ts: ts || nowISO(),
+        text: text,
+        topic: topic || null,
+      };
+      state.events.push(ev);
+      save();
+      renderAll();
+    }
+    function addTask(text) {
+      const task = {
+        id: uid(),
+        text,
+        done: false,
+        createdAt: nowISO() // 添加创建时间
+      };
+      state.tasks.unshift(task); // 新任务置顶
+      save();
+      renderAll();
+    }
+    function addTopic(name) {
+      if (!name) return { ok: false, msg: '名称为空' };
+      const exists = state.topics.find(t =>
+        t.name.trim().toLowerCase() === name.trim().toLowerCase()
+      );
+      if (exists) return { ok: false, msg: '主题已存在' };
+
+      const t = {
+        id: uid(),
+        name: name.trim(),
+        notes: '',
+        done: false,
+        createdAt: nowISO() // 添加创建时间
+      };
+
+      state.topics.unshift(t); // 新主题置顶
+      save();
+      renderAll();
+      return { ok: true, t };
+    }
+
+
+    function updateTopic(id, data) {
+      const t = state.topics.find((x) => x.id === id);
+      if (!t) return;
+      Object.assign(t, data);
+      save();
+      renderAll();
+    }
+
+    // open contextual menu below an element (improved toggle + auto-close)
+    function openMenuForElement(anchor, items, event) {
+      // items: [{label,action}]
+      // if there is already a menu inside this parent, toggle it off
+      const parent = anchor.parentElement;
+      const existing = parent.querySelector(".menu-card");
+      if (existing) {
+        existing.remove();
+        return;
+      }
+      // close any other menus
+      document.querySelectorAll(".menu-card").forEach((n) => n.remove());
+      if (event) {
+        event.stopPropagation();
+      }
+      const card = document.createElement("div");
+      card.className = "menu-card";
+      card.onclick = (e) => {
+        e.stopPropagation();
+      }; // prevent outside click closing when interacting with menu
+      items.forEach((it) => {
+        const btn = document.createElement("button");
+        btn.textContent = it.label;
+        btn.onclick = (() => {
+          return () => {
+            try {
+              it.action();
+            } catch (e) {
+              console.error(e);
+            }
+            card.remove();
+          };
+        })();
+        card.appendChild(btn);
+      });
+      // attach to the anchor's parent so it stays within panel
+      // 将菜单添加到body，避免父元素事件影响
+      // 先添加到body以便测量实际高度
+      document.body.appendChild(card);
+
+      // 重新计算位置，相对于页面定位
+      const rect = anchor.getBoundingClientRect();
+      card.style.position = "fixed";
+      card.style.left = rect.right - 180 + "px";
+
+      // 获取菜单实际高度
+      const menuHeight = card.offsetHeight;
+      const spaceBelow = window.innerHeight - rect.bottom - 10; // 留10px缓冲
+      const spaceAbove = rect.top - 10;
+
+      if (spaceBelow < menuHeight && spaceAbove >= menuHeight) {
+        // 向上展开
+        card.style.top = rect.top - menuHeight - 5 + "px";
+      } else {
+        // 向下展开
+        card.style.top = rect.bottom + 5 + "px";
+      }
+    }
+
+    // close menus when clicking outside
+    document.addEventListener("click", (e) => {
+      // 如果点击的不是菜单内容，则关闭菜单
+      if (!e.target.closest(".menu-card") && !e.target.closest(".more-btn")) {
+        document.querySelectorAll(".menu-card").forEach((n) => n.remove());
+      }
+    });
+
+    // mode buttons
+    document.querySelectorAll(".mode-btn").forEach((b) => {
+      b.onclick = () => {
+        // 切换前自动保存当前编辑
+        if (
+          mode === "edit" &&
+          currentEdit &&
+          (titleInput.value.trim() || bodyInput.value.trim())
+        ) {
+          performSave(true);
         }
-      });
 
-      // mode buttons
-      document.querySelectorAll(".mode-btn").forEach((b) => {
-        b.onclick = () => {
-          // 切换前自动保存当前编辑
-          if (
-            mode === "edit" &&
-            currentEdit &&
-            (titleInput.value.trim() || bodyInput.value.trim())
-          ) {
-            performSave(true);
-          }
-
-          document
-            .querySelectorAll(".mode-btn")
-            .forEach((x) => x.classList.remove("active"));
-          b.classList.add("active");
-          mode = b.dataset.mode;
-          clearEditor();
-        };
-      });
-      function setModeButton() {
         document
           .querySelectorAll(".mode-btn")
           .forEach((x) => x.classList.remove("active"));
-        const btn = Array.from(document.querySelectorAll(".mode-btn")).find(
-          (b) => b.dataset.mode === mode
-        );
-        if (btn) btn.classList.add("active");
-      }
-
-      // search input behavior: re-render timeline on input
-      searchInput.addEventListener("input", () => {
-        renderTimeline();
-      });
-
-      // JSON import/export
-      const btnExport = document.getElementById("btnExport");
-      btnExport.onclick = () => {
-        const blob = new Blob([JSON.stringify(state, null, 2)], {
-          type: "application/json",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download =
-          "timeline_export_" +
-          new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
-          ".json";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        b.classList.add("active");
+        mode = b.dataset.mode;
+        clearEditor();
       };
+    });
+    function setModeButton() {
+      document
+        .querySelectorAll(".mode-btn")
+        .forEach((x) => x.classList.remove("active"));
+      const btn = Array.from(document.querySelectorAll(".mode-btn")).find(
+        (b) => b.dataset.mode === mode
+      );
+      if (btn) btn.classList.add("active");
+    }
 
-      const btnImportLbl = document.getElementById("btnImportLbl");
-      btnImportLbl.onclick = () => fileImport.click();
-      fileImport.onchange = (e) => {
-        const f = e.target.files[0];
-        if (!f) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const imported = JSON.parse(ev.target.result);
-            if (!imported) throw new Error("格式错误");
-            const overwrite = confirm("确认覆盖当前数据？点 [确定] = 覆盖");
-            if (overwrite) {
-              state = imported;
-            } else {
-              return;
-            }
+    // search input behavior: re-render timeline on input
+    searchInput.addEventListener("input", () => {
+      renderTimeline();
+    });
+
+    // JSON import/export
+    const btnExport = document.getElementById("btnExport");
+    btnExport.onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        "timeline_export_" +
+        new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
+        ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    const btnImportLbl = document.getElementById("btnImportLbl");
+    btnImportLbl.onclick = () => fileImport.click();
+    fileImport.onchange = (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          if (!imported) throw new Error("格式错误");
+          const overwrite = confirm("确认覆盖当前数据？点 [确定] = 覆盖");
+          if (overwrite) {
+            state = imported;
+          } else {
+            return;
+          }
+          save();
+          renderAll();
+          alert("导入完成");
+        } catch (err) {
+          alert("导入失败：" + err.message);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = null;
+    };
+
+    const btnClear = document.getElementById("btnClear");
+    btnClear.onclick = () => {
+      if (confirm("清空所有数据？此操作不可撤销，将先自动导出备份")) {
+        // 先自动导出备份
+        try {
+          const blob = new Blob([JSON.stringify(state, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download =
+            "timeline_backup_before_clear_" +
+            new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
+            ".json";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("备份导出失败:", error);
+          if (!confirm("备份导出失败，是否仍要继续清空？")) return;
+        }
+
+        // 执行清空操作
+        state = { events: [], topics: [], tasks: [] };
+        save();
+        renderAll();
+        alert("数据已清空，备份已自动下载");
+      }
+    };
+
+    // utility functions used earlier (delete via editor for events)
+    function deleteEventById(id) {
+      if (confirm("删除该事件？")) {
+        state.events = state.events.filter((e) => e.id !== id);
+        save();
+        renderAll();
+      }
+    }
+
+    // expose delete function in editor via keyboard shortcut: Ctrl+Delete deletes current edit (convenience)
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key === "Delete" && currentEdit) {
+        if (currentEdit.type === "event") deleteEventById(currentEdit.id);
+        if (currentEdit.type === "topic") {
+          if (confirm("删除主题？")) {
+            state.topics = state.topics.filter(
+              (t) => t.id !== currentEdit.id
+            );
+            state.events.forEach((ev) => {
+              if (ev.topic === currentEdit.id) ev.topic = null;
+            });
             save();
             renderAll();
-            alert("导入完成");
-          } catch (err) {
-            alert("导入失败：" + err.message);
           }
-        };
-        reader.readAsText(f);
-        e.target.value = null;
-      };
-
-      const btnClear = document.getElementById("btnClear");
-      btnClear.onclick = () => {
-        if (confirm("清空所有数据？此操作不可撤销，将先自动导出备份")) {
-          // 先自动导出备份
-          try {
-            const blob = new Blob([JSON.stringify(state, null, 2)], {
-              type: "application/json",
-            });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download =
-              "timeline_backup_before_clear_" +
-              new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
-              ".json";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error("备份导出失败:", error);
-            if (!confirm("备份导出失败，是否仍要继续清空？")) return;
-          }
-
-          // 执行清空操作
-          state = { events: [], topics: [], tasks: [] };
-          save();
-          renderAll();
-          alert("数据已清空，备份已自动下载");
         }
-      };
-
-      // utility functions used earlier (delete via editor for events)
-      function deleteEventById(id) {
-        if (confirm("删除该事件？")) {
-          state.events = state.events.filter((e) => e.id !== id);
-          save();
-          renderAll();
+        if (currentEdit.type === "task") {
+          if (confirm("删除任务？")) {
+            state.tasks = state.tasks.filter((x) => x.id !== currentEdit.id);
+            save();
+            renderAll();
+          }
         }
       }
+    });
+    // 添加输入监听以触发自动保存
+    titleInput.addEventListener("input", autoSave);
+    bodyInput.addEventListener("input", autoSave);
+    topicSelect.addEventListener("change", autoSave);
+    // initial render update
+    renderAll();
+    // 页面卸载时自动导出JSON
+    window.addEventListener("beforeunload", function (e) {
+      // 检查是否有数据需要导出
+      if (
+        state.events.length > 0 ||
+        state.topics.length > 0 ||
+        state.tasks.length > 0
+      ) {
+        try {
+          // 创建并下载JSON文件
+          const blob = new Blob([JSON.stringify(state, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download =
+            "timeline_auto_backup_" +
+            new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
+            ".json";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("自动导出失败:", error);
+        }
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      setupAutoSaveDetection();
+    });
+  </script>
+</body>
 
-      // expose delete function in editor via keyboard shortcut: Ctrl+Delete deletes current edit (convenience)
-      document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && e.key === "Delete" && currentEdit) {
-          if (currentEdit.type === "event") deleteEventById(currentEdit.id);
-          if (currentEdit.type === "topic") {
-            if (confirm("删除主题？")) {
-              state.topics = state.topics.filter(
-                (t) => t.id !== currentEdit.id
-              );
-              state.events.forEach((ev) => {
-                if (ev.topic === currentEdit.id) ev.topic = null;
-              });
-              save();
-              renderAll();
-            }
-          }
-          if (currentEdit.type === "task") {
-            if (confirm("删除任务？")) {
-              state.tasks = state.tasks.filter((x) => x.id !== currentEdit.id);
-              save();
-              renderAll();
-            }
-          }
-        }
-      });
-      // 添加输入监听以触发自动保存
-      titleInput.addEventListener("input", autoSave);
-      bodyInput.addEventListener("input", autoSave);
-      topicSelect.addEventListener("change", autoSave);
-      // initial render update
-      renderAll();
-      // 页面卸载时自动导出JSON
-      window.addEventListener("beforeunload", function (e) {
-        // 检查是否有数据需要导出
-        if (
-          state.events.length > 0 ||
-          state.topics.length > 0 ||
-          state.tasks.length > 0
-        ) {
-          try {
-            // 创建并下载JSON文件
-            const blob = new Blob([JSON.stringify(state, null, 2)], {
-              type: "application/json",
-            });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download =
-              "timeline_auto_backup_" +
-              new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") +
-              ".json";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error("自动导出失败:", error);
-          }
-        }
-      });
-    </script>
-  </body>
 </html>
