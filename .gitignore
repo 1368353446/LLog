@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Data files (uncomment if you don't want to track data changes)
+# data/
+# !data/backups/.gitkeep
+# !data/exports/.gitkeep
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Claude Code files
+.claude/
+claude.md
+claude_*.md
+
+# Build outputs
+dist/
+build/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package files
+*.zip
+*.tar.gz

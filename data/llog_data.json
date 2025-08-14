@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "id": "test-event-1",
+      "ts": "2025-08-14T05:24:44.634Z",
+      "text": "测试事件 1",
+      "topic": null
+    }
+  ],
+  "topics": [
+    {
+      "id": "test-topic-1",
+      "name": "测试主题",
+      "notes": "这是一个测试主题",
+      "done": false,
+      "createdAt": "2025-08-14T05:24:44.634Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "test-task-1",
+      "text": "测试任务",
+      "done": false,
+      "notes": "这是一个测试任务",
+      "createdAt": "2025-08-14T05:24:44.634Z"
+    }
+  ]
+}
