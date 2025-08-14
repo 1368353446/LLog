@@ -10,34 +10,52 @@ LLog is a lightweight, self-hosted timeline-based data management application th
 - 🏷️ **Topic Management**: Organize events by topics for better categorization
 - ✅ **Task Tracking**: Keep track of your to-do items with completion status
 - 💾 **Dual Storage System**: 
-  - Browser storage for offline use
+  - Browser storage for offline use (works without server)
   - Local server for persistent data storage
   - Automatic synchronization between both when server is available
 - 🔄 **Automatic Backup**: Keeps last 30 backups of your data
 - 📤 **Import/Export**: Easily migrate your data between installations
 - 🌐 **Cross-platform**: Works on Windows, macOS, and Linux
 
-## Use Cases
+## How It Works
 
-- Personal journal and event tracking
-- Project management with timeline visualization
-- Meeting notes and action item tracking
-- Daily task management
-- Research and idea organization
+LLog can be used in two ways:
+
+1. **Browser-only Mode**: 
+   - Simply open `index.html` in your browser
+   - All data is stored in your browser's localStorage
+   - No server required, works completely offline
+   - Perfect for quick usage and testing
+
+2. **Server Mode** (for persistent local storage):
+   - Run the local server to enable file-based data storage
+   - Data is automatically synchronized between browser and local files
+   - Provides backup and export capabilities
+   - Works even when browser data is cleared
+
+The frontend automatically detects whether the server is available and switches between modes accordingly.
 
 ## Quick Start
 
-### Option 1: Run Pre-built Executable (Recommended)
+### Method 1: Direct Browser Usage (No Installation Required)
 
+1. Simply open `index.html` in your browser
+2. Start using LLog immediately - all data is saved in your browser
+3. No server needed for basic functionality
+
+### Method 2: With Local Server (For Persistent Storage)
+
+You can start the local server in two ways:
+
+**Option A: Using Pre-built Executable**
 1. Download the pre-built executable for your platform from the [Releases](https://github.com/your-username/llog/releases) page
 2. Run the executable:
    - Windows: Double-click `my-node-service.exe`
    - Linux/macOS: Run `./my-node-service` in terminal
-3. Open your browser and navigate to http://127.0.0.1:3001
-4. Start using LLog!
+3. Open `index.html` in your browser
+4. The app will automatically connect to the local server
 
-### Option 2: Run from Source Code
-
+**Option B: Running from Source Code**
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/llog.git
@@ -58,7 +76,15 @@ LLog is a lightweight, self-hosted timeline-based data management application th
    npm start
    ```
 
-4. Open your browser and navigate to http://127.0.0.1:3001
+4. Open `index.html` in your browser
+
+## Use Cases
+
+- Personal journal and event tracking
+- Project management with timeline visualization
+- Meeting notes and action item tracking
+- Daily task management
+- Research and idea organization
 
 ## Building from Source
 
@@ -94,7 +120,7 @@ If you want to build the project yourself:
 
 ```
 llog/
-├── index.html          # Frontend client application
+├── index.html          # Frontend client application (main entry point)
 ├── server.js           # Main server implementation
 ├── start.sh            # Interactive startup script
 ├── pack.sh             # Packaging script for executables
