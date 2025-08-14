@@ -616,10 +616,6 @@
                     JSON</label>
                 <label class="mode-btn" id="btnExport" style="border: 1px solid var(--border); cursor: pointer">📤 导出
                     JSON</label>
-                <label class="mode-btn" id="btnClear" style="border: 1px solid var(--border); cursor: pointer">🗑️
-                    清空</label>
-                <label class="mode-btn" id="btnDebugPath" style="border: 1px solid var(--border); cursor: pointer">📍
-                    数据路径</label>
             </div>
         </header>
 
@@ -975,8 +971,8 @@
                 if (!title && isAutoSave) return; // 自动保存时标题为空则跳过
                 if (!title && !isAutoSave) throw new Error('请输入事件标题');
 
-                const text = title + (body ? "\n" + body : "");
-                ev.text = text;
+                ev.title = title;
+                ev.text = body;
                 ev.topic = topicId || null;
 
             } else if (currentEdit.type === "topic") {
@@ -1012,8 +1008,7 @@
         async function saveNewContent(title, body, topicId) {
             if (mode === 'add-event') {
                 if (!body && !title) throw new Error('请输入事件内容');
-                const text = body || title;
-                addEvent(text, nowISO(), topicId);
+                addEvent(title, body, nowISO(), topicId);
 
             } else if (mode === 'add-task') {
                 if (!title) throw new Error('请输入任务标题');
@@ -1075,8 +1070,8 @@
             if (type === 'event') {
                 const ev = state.events.find(x => x.id === id);
                 if (!ev) return;
-                titleInput.value = (ev.text || '').split(/\n/)[0];
-                bodyInput.value = ev.text;
+                titleInput.value = ev.title || '';
+                bodyInput.value = ev.text || '';
                 topicSelect.value = ev.topic || '';
             } else if (type === 'topic') {
                 const t = state.topics.find(x => x.id === id);
@@ -1112,14 +1107,56 @@
             if (idx === -1) return;
             const item = arr.splice(idx, 1)[0];
             item.done = !!checked;
+            insertItemInOrder(arr, item);
+            saveData();
+            renderAll();
+        }
+
+        // 通用的项目插入函数，保持勾选状态的正确排序
+        function insertItemInOrder(arr, item) {
             if (item.done) {
+                // 勾选的项目放在所有未勾选项目之后
                 const countUnchecked = arr.filter((x) => !x.done).length;
                 arr.splice(countUnchecked, 0, item);
             } else {
+                // 未勾选的项目放在所有勾选项目之前
                 const firstChecked = arr.findIndex((x) => x.done);
-                const insertIndex = firstChecked === -1 ? 0 : firstChecked;
+                const insertIndex = firstChecked === -1 ? arr.length : firstChecked;
                 arr.splice(insertIndex, 0, item);
             }
+        }
+
+        // 置顶操作（保持勾选状态排序）
+        function moveToTop(listName, id) {
+            const arr = state[listName];
+            const idx = arr.findIndex((x) => x.id === id);
+            if (idx === -1) return;
+            const item = arr.splice(idx, 1)[0];
+            item.done = !!item.done; // 保持原有的勾选状态
+            insertItemInOrder(arr, item);
+            saveData();
+            renderAll();
+        }
+
+        // 置底操作（保持勾选状态排序）
+        function moveToBottom(listName, id) {
+            const arr = state[listName];
+            const idx = arr.findIndex((x) => x.id === id);
+            if (idx === -1) return;
+            const item = arr.splice(idx, 1)[0];
+            item.done = !!item.done; // 保持原有的勾选状态
+
+            // 对于置底操作，我们需要将项目放在同类项目（勾选或未勾选）的末尾
+            if (item.done) {
+                // 勾选的项目放在所有勾选项目的末尾
+                arr.push(item);
+            } else {
+                // 未勾选的项目放在所有未勾选项目的末尾，但在勾选项目之前
+                const firstChecked = arr.findIndex((x) => x.done);
+                const insertIndex = firstChecked === -1 ? arr.length : firstChecked;
+                arr.splice(insertIndex, 0, item);
+            }
+
             saveData();
             renderAll();
         }
@@ -1167,21 +1204,15 @@
                 mBtn.onclick = (e) => {
                     openMenuForElement(mBtn, [
                         {
-                            label: "📌 置顶",
+                            label: "📍 置顶",
                             action: async () => {
-                                state.tasks.splice(idx, 1);
-                                state.tasks.unshift(t);
-                                await saveData();
-                                renderAll();
+                                moveToTop("tasks", t.id);
                             },
                         },
                         {
-                            label: "📍 置底",
+                            label: "📌 置底",
                             action: async () => {
-                                state.tasks.splice(idx, 1);
-                                state.tasks.push(t);
-                                await saveData();
-                                renderAll();
+                                moveToBottom("tasks", t.id);
                             },
                         },
                         {
@@ -1282,19 +1313,13 @@
                         {
                             label: "📌 置顶",
                             action: async () => {
-                                state.topics.splice(idx, 1);
-                                state.topics.unshift(t);
-                                await saveData();
-                                renderAll();
+                                moveToTop("topics", t.id);
                             },
                         },
                         {
                             label: "📍 置底",
                             action: async () => {
-                                state.topics.splice(idx, 1);
-                                state.topics.push(t);
-                                await saveData();
-                                renderAll();
+                                moveToBottom("topics", t.id);
                             },
                         },
                         {
@@ -1368,10 +1393,9 @@
                 node.className = "node";
                 node.style.animationDelay = `${idx * 0.1}s`;
 
-                const firstLine = (ev.text || "").split(/\n/)[0];
                 const title = document.createElement("div");
                 title.className = "title";
-                title.textContent = firstLine || "(无内容)";
+                title.textContent = ev.title || (ev.text ? ev.text.split(/\n/)[0] : "") || "(无内容)";
 
                 const timeEl = document.createElement("time");
                 timeEl.textContent = new Date(ev.ts).toLocaleString();
@@ -1424,11 +1448,12 @@
         // 数据操作函数（保持原有逻辑不变）
         // =============================================================================
 
-        function addEvent(text, ts = null, topic = null) {
+        function addEvent(title, text, ts = null, topic = null) {
             const ev = {
                 id: uid(),
                 ts: ts || nowISO(),
-                text: text,
+                title: title || '',
+                text: text || '',
                 topic: topic || null,
             };
             state.events.push(ev);
@@ -1676,23 +1701,6 @@
                 e.target.value = null;
             };
 
-            // 清空按钮
-            const btnClear = document.getElementById("btnClear");
-            btnClear.onclick = async () => {
-                if (confirm("清空所有数据？此操作不可撤销，将先自动导出备份")) {
-                    try {
-                        await exportData(); // 先导出备份
-                        state = { events: [], topics: [], tasks: [] };
-                        await saveData();
-                        renderAll();
-                        clearEditor();
-                        showMessage('数据已清空，备份已导出', 'success');
-                    } catch (error) {
-                        console.error("清空操作失败:", error);
-                        showMessage('清空失败: ' + error.message, 'error');
-                    }
-                }
-            };
 
             // 服务状态检查按钮
             const btnCheckServer = document.getElementById("btnCheckServer");
