@@ -144,6 +144,53 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// 生成唯一ID（与前端保持一致）
+function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// 处理导入数据，生成缺失的ID并排序事件
+function processImportData(data) {
+    // 确保基本结构存在
+    const processedData = {
+        events: Array.isArray(data.events) ? [...data.events] : [],
+        topics: Array.isArray(data.topics) ? [...data.topics] : [],
+        tasks: Array.isArray(data.tasks) ? [...data.tasks] : []
+    };
+
+    // 处理事件：生成缺失的ID
+    processedData.events = processedData.events.map(event => {
+        return {
+            ...event,
+            id: event.id || uid(),
+            ts: event.ts || new Date().toISOString()
+        };
+    });
+
+    // 处理主题：生成缺失的ID
+    processedData.topics = processedData.topics.map(topic => {
+        return {
+            ...topic,
+            id: topic.id || uid(),
+            createdAt: topic.createdAt || new Date().toISOString()
+        };
+    });
+
+    // 处理任务：生成缺失的ID
+    processedData.tasks = processedData.tasks.map(task => {
+        return {
+            ...task,
+            id: task.id || uid(),
+            createdAt: task.createdAt || new Date().toISOString()
+        };
+    });
+
+    // 按时间戳对事件进行排序（升序）
+    processedData.events.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+    return processedData;
+}
+
 // 保存数据
 app.post('/api/data', async (req, res) => {
     try {
@@ -154,12 +201,8 @@ app.post('/api/data', async (req, res) => {
             return res.status(400).json({ error: '无效的数据格式' });
         }
 
-        // 确保基本结构存在
-        const validData = {
-            events: Array.isArray(data.events) ? data.events : [],
-            topics: Array.isArray(data.topics) ? data.topics : [],
-            tasks: Array.isArray(data.tasks) ? data.tasks : []
-        };
+        // 处理导入数据：生成缺失的ID并排序事件
+        const validData = processImportData(data);
 
         await writeDataFile(validData);
         res.json({ 

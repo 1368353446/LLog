@@ -47,7 +47,7 @@
         .wrap {
             display: grid;
             grid-template-columns: 280px 1fr 280px;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto 1fr 120px;
             gap: var(--gap);
             padding: var(--gap);
             height: 100vh;
@@ -81,13 +81,14 @@
         .panel {
             background: var(--card);
             border-radius: var(--radius);
-            padding: 16px;
+            padding: 12px;
             box-shadow: var(--shadow-md);
             overflow: auto;
             border: 1px solid var(--border);
             backdrop-filter: blur(10px);
             animation: fadeInUp 0.6s ease-out;
             animation-fill-mode: both;
+            max-height: calc(100vh - 200px);
         }
 
         .left {
@@ -99,6 +100,7 @@
             flex-direction: column;
             gap: 12px;
             animation-delay: 0.2s;
+            height: 100%;
         }
 
         .right {
@@ -108,21 +110,21 @@
         /* Center Editor */
         .mode-bar {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
-            padding: 6px;
+            padding: 5px;
             background: var(--accent-light);
             border-radius: var(--radius-sm);
             border: 1px solid var(--accent-border);
         }
 
         .mode-btn {
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: var(--radius-sm);
             border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--muted);
             position: relative;
@@ -145,23 +147,25 @@
         .editor {
             background: var(--card-hover);
             border-radius: var(--radius);
-            padding: 18px;
+            padding: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            flex: 1;
+            height: 100%;
         }
 
         input,
         textarea,
         select {
-            padding: 14px 16px;
+            padding: 12px 14px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
             background: rgba(255, 255, 255, 0.7);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.2s ease;
         }
 
@@ -176,7 +180,7 @@
         }
 
         textarea.large {
-            min-height: 180px;
+            min-height: 250px;
             resize: vertical;
             font-family: inherit;
         }
@@ -231,11 +235,11 @@
         .list-title {
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 16px;
-            font-size: 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .list-title::before {
@@ -251,14 +255,18 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
+            padding: 12px;
             border-radius: var(--radius-sm);
             background: rgba(255, 255, 255, 0.7);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             border: 1px solid var(--border);
             position: relative;
             cursor: pointer;
             animation: slideInLeft 0.4s ease-out;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.4;
         }
 
         .task:hover,
@@ -275,9 +283,9 @@
         }
 
         .chk {
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
             cursor: pointer;
             accent-color: var(--success);
         }
@@ -285,11 +293,11 @@
         /* Icons */
         .more-btn {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid var(--border);
             display: flex;
@@ -342,10 +350,12 @@
             color: #3b82f6;
         }
 
+
+
         /* Timeline */
         .timeline-bar {
             grid-column: 1/-1;
-            height: 140px;
+            height: 120px;
             background: transparent;
             display: flex;
             align-items: center;
@@ -355,27 +365,103 @@
 
         .timeline-inner {
             width: 100%;
-            max-width: 1200px;
             background: var(--card);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 6px 10px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-md);
             overflow: auto;
             backdrop-filter: blur(10px);
+            /* 优化滚动条样式 */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
         }
 
+        /* 增强版时间轴滚动条样式 */
+        .timeline-inner::-webkit-scrollbar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+        }
+
+        .timeline-inner::-webkit-scrollbar-track {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(30, 64, 175, 0.1));
+            border-radius: 5px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .timeline-inner::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timeline-inner::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+            transform: scaleY(1.2);
+        }
+
+        .timeline-inner::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(90deg, #1d4ed8, #1e3a8a);
+        }
+
+        /* Firefox 滚动条样式 */
+        .timeline-inner {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 rgba(59, 130, 246, 0.1);
+        }
+
+        .timeline-inner::-webkit-scrollbar {
+            transition: all 0.3s ease;
+        }
+
+        .timeline-inner:not(:hover)::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .timeline-inner:hover::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        /* 滚动条拖拽时的视觉反馈 */
+        .timeline-inner::-webkit-scrollbar-thumb:active {
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        }
+
+        /* 为时间轴容器添加微妙的内阴影 */
+        .timeline-inner {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 时间轴容器 */
         .timeline {
             display: flex;
-            gap: 16px;
+            gap: 15px;
             align-items: center;
-            padding: 12px;
+            padding: 10px 8px;
+            position: relative;
+        }
+
+        /* 添加时间轴主线 */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, #3b82f6, #1e40af);
+            transform: translateY(-50%);
+            box-shadow: 0 0 2px rgba(59, 130, 246, 0.3);
+            z-index: 0;
         }
 
         .node {
-            min-width: 200px;
+            min-width: 170px;
             flex: 0 0 auto;
-            padding: 16px;
+            padding: 10px 12px;
             border-radius: var(--radius-sm);
             background: white;
             border: 1px solid var(--border);
@@ -384,11 +470,13 @@
             box-shadow: var(--shadow-sm);
             animation: scaleIn 0.4s ease-out;
             animation-fill-mode: both;
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .node:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-lg);
             background: var(--card-hover);
         }
 
@@ -397,29 +485,45 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 160px;
+            max-width: 130px;
             color: var(--text);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            font-size: 13px;
         }
 
         .node time {
             display: block;
-            font-size: 12px;
+            font-size: 10px;
             color: var(--muted);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .node .content {
+            display: none;
+        }
+
+        .node .topic-tag {
+            display: inline-block;
+            background: var(--accent-light);
+            color: #3b82f6;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 10px;
             font-weight: 500;
         }
 
         .node .delete-btn {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 24px;
-            height: 24px;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
             border: none;
             border-radius: 50%;
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             display: none;
@@ -596,6 +700,42 @@
             opacity: 0.7;
             background: rgba(16, 185, 129, 0.05);
         }
+
+        /* Message box styles */
+        .message-box {
+            background: white;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        .message-box.show {
+            opacity: 1;
+        }
+
+        .message-box.info {
+            background: var(--accent-light);
+            color: #3b82f6;
+            border: 1px solid var(--accent-border);
+        }
+
+        .message-box.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .message-box.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .message-box.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 
@@ -603,10 +743,12 @@
 
     <div class="wrap">
         <header>
-            <h1>✨ LLog</h1>
-            <div class="server-controls" style="font-size: 12px;">
-                <span id="serverStatus" class="server-status" style="font-size: 12px;">🔄 检测中...</span>
-                <button id="btnCheckServer" class="btn" style="font-size: 12px; padding: 4px 8px;">🔄 检测服务</button>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h1>✨ LLog</h1>
+                <div class="server-controls" style="font-size: 12px;">
+                    <span id="serverStatus" class="server-status" style="font-size: 12px;">🔄 检测中...</span>
+                    <button id="btnCheckServer" class="btn" style="font-size: 12px; padding: 4px 8px;">🔄 检测服务</button>
+                </div>
             </div>
 
             <div style="display: flex; gap: 8px; align-items: center">
@@ -618,6 +760,24 @@
                     JSON</label>
             </div>
         </header>
+
+        <!-- 消息提示框 -->
+        <div id="messageContainer"
+            style="grid-column: 1/-1; position: fixed; top: 20px; left: 45%; transform: translateX(-50%); z-index: 1000; display: none;">
+            <div id="messageBox" class="message-box" style="
+                padding: 16px 32px;
+                border-radius: var(--radius-sm);
+                font-size: 14px;
+                font-weight: 500;
+                text-align: center;
+                box-shadow: var(--shadow-lg);
+                animation: fadeIn 0.3s ease-out;
+                min-width: 400px;
+                max-width: 600px;
+                background: white;
+                border: 1px solid var(--border);
+            "></div>
+        </div>
 
         <!-- left: tasks -->
         <aside class="panel left">
@@ -1030,9 +1190,31 @@
 
         // 显示消息提示
         function showMessage(message, type = 'info') {
-            // 简单的消息提示实现
+            const container = document.getElementById('messageContainer');
+            const messageBox = document.getElementById('messageBox');
+
+            // 设置消息内容和样式
+            messageBox.textContent = message;
+            messageBox.className = 'message-box ' + type;
+
+            // 显示消息容器
+            container.style.display = 'block';
+
+            // 触发显示动画
+            setTimeout(() => {
+                messageBox.classList.add('show');
+            }, 10);
+
+            // 3秒后自动隐藏消息
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                setTimeout(() => {
+                    container.style.display = 'none';
+                }, 300);
+            }, 3000);
+
+            // 同时输出到控制台
             console.log(`[${type.toUpperCase()}] ${message}`);
-            // 可以扩展为更复杂的UI提示
         }
 
         // 在编辑器跳转前保存当前内容
@@ -1400,6 +1582,15 @@
                 const timeEl = document.createElement("time");
                 timeEl.textContent = new Date(ev.ts).toLocaleString();
 
+                // 不再添加内容预览
+
+                // 添加主题标签
+                const topicTag = document.createElement("div");
+                topicTag.className = "topic-tag";
+                const topic = ev.topic ? state.topics.find(t => t.id === ev.topic) : null;
+                topicTag.textContent = topic ? topic.name : "无主题";
+                topicTag.style.display = ev.topic ? "inline-block" : "none";
+
                 const deleteBtn = document.createElement("button");
                 deleteBtn.innerHTML = "×";
                 deleteBtn.className = "delete-btn";
@@ -1418,6 +1609,7 @@
 
                 node.appendChild(title);
                 node.appendChild(timeEl);
+                node.appendChild(topicTag);
                 node.appendChild(deleteBtn);
                 timelineEl.appendChild(node);
 
@@ -1569,7 +1761,7 @@
                                 filename: fileName
                             })
                         });
-                        showMessage('导出成功到本地文件', 'success');
+                        showMessage('✅ 数据已成功导出到本地文件：' + fileName, 'success');
                     } catch (error) {
                         console.warn('本地服务导出失败，使用浏览器下载:', error.message);
                         // 降级到浏览器下载
@@ -1581,7 +1773,7 @@
                 }
             } catch (error) {
                 console.error('导出失败:', error);
-                showMessage('导出失败: ' + error.message, 'error');
+                showMessage('❌ 导出失败: ' + error.message, 'error');
             }
         }
 
@@ -1596,34 +1788,54 @@
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-            showMessage('导出成功', 'success');
+            showMessage('✅ 数据已通过浏览器下载：' + filename, 'success');
         }
 
         async function importData() {
-            try {
-                if (hasLocalServer) {
-                    // 通过本地服务导入
-                    try {
-                        const result = await apiRequest('/import', {
-                            method: 'POST'
-                        });
-                        if (result.data) {
-                            await processImportedData(JSON.stringify(result.data));
-                        } else {
-                            showMessage('未选择文件', 'warning');
-                        }
-                        return;
-                    } catch (error) {
-                        console.warn('本地服务导入失败，使用浏览器文件选择:', error.message);
-                    }
-                }
+            // 直接触发文件选择，不依赖本地服务
+            fileImport.click();
+        }
 
-                // 浏览器环境：使用文件输入
-                fileImport.click();
-            } catch (error) {
-                console.error('导入失败:', error);
-                showMessage('导入失败: ' + error.message, 'error');
-            }
+        // 处理导入的数据，生成缺失的ID并排序事件
+        function processImportedDataStructure(imported) {
+            // 确保基本结构存在
+            const processed = {
+                events: Array.isArray(imported.events) ? [...imported.events] : [],
+                topics: Array.isArray(imported.topics) ? [...imported.topics] : [],
+                tasks: Array.isArray(imported.tasks) ? [...imported.tasks] : []
+            };
+
+            // 处理事件：生成缺失的ID
+            processed.events = processed.events.map(event => {
+                return {
+                    ...event,
+                    id: event.id || uid(),
+                    ts: event.ts || new Date().toISOString()
+                };
+            });
+
+            // 处理主题：生成缺失的ID
+            processed.topics = processed.topics.map(topic => {
+                return {
+                    ...topic,
+                    id: topic.id || uid(),
+                    createdAt: topic.createdAt || new Date().toISOString()
+                };
+            });
+
+            // 处理任务：生成缺失的ID
+            processed.tasks = processed.tasks.map(task => {
+                return {
+                    ...task,
+                    id: task.id || uid(),
+                    createdAt: task.createdAt || new Date().toISOString()
+                };
+            });
+
+            // 按时间戳对事件进行排序（升序）
+            processed.events.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+            return processed;
         }
 
         async function processImportedData(content) {
@@ -1631,13 +1843,37 @@
                 const imported = JSON.parse(content);
                 if (!imported) throw new Error("格式错误");
 
-                const overwrite = confirm("确认覆盖当前数据？点 [确定] = 覆盖");
-                if (overwrite) {
-                    state = imported;
-                    await saveData();
-                    renderAll();
-                    showMessage('导入完成', 'success');
+                // 处理导入的数据：生成缺失的ID并排序事件
+                const processedData = processImportedDataStructure(imported);
+
+                // 自动备份当前数据
+                try {
+                    const backupData = JSON.stringify(state, null, 2);
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+                    const backupFileName = `llog_backup_${timestamp}.json`;
+
+                    if (hasLocalServer) {
+                        // 通过本地服务备份
+                        await apiRequest('/export', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                data: state,
+                                filename: backupFileName
+                            })
+                        });
+                    } else {
+                        // 浏览器环境：直接下载备份
+                        downloadAsFile(backupData, backupFileName);
+                    }
+                } catch (backupError) {
+                    console.warn('自动备份失败:', backupError);
                 }
+
+                // 直接替换数据
+                state = processedData;
+                await saveData();
+                renderAll();
+                showMessage('导入完成，原数据已自动备份', 'success');
             } catch (err) {
                 showMessage('导入失败：' + err.message, 'error');
             }
@@ -1741,6 +1977,7 @@
                     await deleteCurrentEditItem();
                 }
             });
+
         }
 
         // 更新服务器状态显示

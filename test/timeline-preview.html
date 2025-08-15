@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>LLog 时间轴优化预览</title>
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card: rgba(255, 255, 255, 0.85);
+            --card-hover: rgba(255, 255, 255, 0.95);
+            --accent: linear-gradient(135deg, #3b82f6, #1e40af);
+            --accent-light: rgba(59, 130, 246, 0.1);
+            --accent-border: rgba(59, 130, 246, 0.2);
+            --muted: #64748b;
+            --text: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(148, 163, 184, 0.2);
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+            --shadow-md: 0 8px 25px rgba(15, 23, 42, 0.12);
+            --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --gap: 18px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .wrap {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+            gap: var(--gap);
+            padding: var(--gap);
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--card);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            overflow: auto;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        /* 优化后的时间轴样式 */
+        .timeline-bar {
+            height: 180px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: slideUp 0.6s ease-out 0.4s both;
+        }
+
+        .timeline-inner {
+            width: 100%;
+            max-width: 100%;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            overflow: auto;
+            backdrop-filter: blur(10px);
+            /* 优化滚动条样式 */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        /* Webkit 滚动条样式 */
+        .timeline-inner::-webkit-scrollbar {
+            height: 8px;
+            background: transparent;
+        }
+
+        .timeline-inner::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 4px;
+        }
+
+        .timeline-inner::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .timeline-inner::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
+        /* 时间轴容器 */
+        .timeline {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 15px 10px;
+            position: relative;
+            /* 添加时间轴主线 */
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(to right, #3b82f6, #1e40af);
+                transform: translateY(-50%);
+                border-radius: 2px;
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+                z-index: 0;
+            }
+        }
+
+        .node {
+            min-width: 220px;
+            flex: 0 0 auto;
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            background: white;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+            animation: scaleIn 0.4s ease-out;
+            animation-fill-mode: both;
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .node:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            background: var(--card-hover);
+        }
+
+        .node .title {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .node time {
+            display: block;
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .node .content {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .node .topic-tag {
+            display: inline-block;
+            background: var(--accent-light);
+            color: #3b82f6;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .node .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .node:hover .delete-btn {
+            display: flex;
+        }
+
+        .node .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <h1>✨ LLog 时间轴优化预览</h1>
+        </header>
+
+        <main class="panel">
+            <h2>优化后的时间轴效果</h2>
+            <p>添加了时间轴主线和优化的滚动条样式，保持水平滚动方向</p>
+            
+            <div class="timeline-bar">
+                <div class="timeline-inner">
+                    <div class="timeline">
+                        <!-- 事件节点 1 -->
+                        <div class="node">
+                            <div class="title">项目启动会议</div>
+                            <time>2023-05-15 09:00</time>
+                            <div class="content">今天我们召开了项目启动会议，确定了项目的整体目标和时间安排。</div>
+                            <div class="topic-tag">项目管理</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 2 -->
+                        <div class="node">
+                            <div class="title">需求分析完成</div>
+                            <time>2023-05-22 14:30</time>
+                            <div class="content">经过一周的调研和讨论，我们完成了详细的需求分析文档。</div>
+                            <div class="topic-tag">需求分析</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 3 -->
+                        <div class="node">
+                            <div class="title">UI设计初稿</div>
+                            <time>2023-06-05 11:15</time>
+                            <div class="content">设计团队完成了用户界面的初步设计，包括主要页面布局。</div>
+                            <div class="topic-tag">UI设计</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 4 -->
+                        <div class="node">
+                            <div class="title">核心功能开发</div>
+                            <time>2023-06-20 16:45</time>
+                            <div class="content">后端团队完成了用户认证和数据管理模块的开发。</div>
+                            <div class="topic-tag">开发进展</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 5 -->
+                        <div class="node">
+                            <div class="title">测试阶段开始</div>
+                            <time>2023-07-08 10:00</time>
+                            <div class="content">产品进入内部测试阶段，测试团队将进行全面的功能测试。</div>
+                            <div class="topic-tag">测试计划</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 6 -->
+                        <div class="node">
+                            <div class="title">用户反馈收集</div>
+                            <time>2023-07-22 14:20</time>
+                            <div class="content">我们收集了第一批用户的反馈，并整理了改进需求列表。</div>
+                            <div class="topic-tag">用户反馈</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                        
+                        <!-- 事件节点 7 -->
+                        <div class="node">
+                            <div class="title">版本发布</div>
+                            <time>2023-08-05 09:30</time>
+                            <div class="content">经过两个月的开发和测试，我们正式发布了第一个稳定版本。</div>
+                            <div class="topic-tag">产品发布</div>
+                            <button class="delete-btn">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
