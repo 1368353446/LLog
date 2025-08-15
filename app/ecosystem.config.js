@@ -10,12 +10,12 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
-        LLOG_DATA_DIR: process.env.LLOG_DATA_DIR || './data'
+        LLOG_DATA_DIR: process.env.LLOG_DATA_DIR || '../data'
       },
       env_development: {
         NODE_ENV: 'development',
         PORT: 3001,
-        LLOG_DATA_DIR: './data'
+        LLOG_DATA_DIR: '../data'
       },
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
       error_file: './logs/err.log',

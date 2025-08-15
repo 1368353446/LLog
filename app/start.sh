@@ -39,7 +39,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # 创建必要目录
-mkdir -p data/backups data/exports logs
+mkdir -p ../data/backups ../data/exports logs
 
 echo ""
 echo "请选择启动模式："

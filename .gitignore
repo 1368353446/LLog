@@ -27,6 +27,7 @@ logs/
 .claude/
 claude.md
 claude_*.md
+CLAUDE.md
 
 # Build outputs
 dist/

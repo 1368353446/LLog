@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // 数据文件路径配置
-const DATA_DIR = process.env.LLOG_DATA_DIR || path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.LLOG_DATA_DIR || path.join(process.cwd(), '../data');
 const DATA_FILE = path.join(DATA_DIR, 'llog_data.json');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const EXPORT_DIR = path.join(DATA_DIR, 'exports');
