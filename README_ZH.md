@@ -47,11 +47,9 @@ LLog 可以通过两种方式使用：
 
 您可以通过两种方式启动本地服务器：
 
-**选项A：使用预构建可执行文件**
+**选项A：使用预构建可执行文件（windows）**
 1. 从 [Releases](https://github.com/your-username/llog/releases) 页面下载适用于您平台的预构建可执行文件
-2. 运行可执行文件：
-   - Windows：双击 `my-node-service.exe`
-   - Linux/macOS：在终端中运行 `./my-node-service`
+2. 运行可执行文件data_service.exe
 3. 在浏览器中打开 `index.html`
 4. 应用程序将自动连接到本地服务器
 
@@ -112,26 +110,27 @@ LLog 可以通过两种方式使用：
    ```
    或手动构建：
    ```bash
-   pkg server.js --targets node18-linux-x64 --output my-node-service
-   pkg server.js --targets node18-win-x64 --output my-node-service.exe
+   pkg server.js --targets node18-linux-x64 --output data_service
+   pkg server.js --targets node18-win-x64 --output data_service.exe
    ```
 
 ## 项目结构
 
 ```
-llog/
-├── index.html          # 前端客户端应用程序（主入口点）
-├── server.js           # 主服务器实现
-├── start.sh            # 交互式启动脚本
-├── pack.sh             # 可执行文件打包脚本
-├── ecosystem.config.js # 生产环境的 PM2 配置
-├── package.json        # 项目依赖和脚本
-├── test-server.js      # API 测试套件
+LLog/
+├── app/                # 应用程序目录
+│   ├── index.html      # 前端客户端应用程序（主入口点）
+│   ├── server.js       # 主服务器实现
+│   ├── start.sh        # 交互式启动脚本
+│   ├── pack.sh         # 可执行文件打包脚本
+│   ├── ecosystem.config.js # 生产环境的 PM2 配置
+│   ├── package.json    # 项目依赖和脚本
+│   └── test/           # 测试目录
 ├── data/               # 数据存储目录
 │   ├── llog_data.json  # 主数据文件
 │   ├── backups/        # 自动备份
 │   └── exports/        # 导出的数据文件
-└── logs/               # 服务器日志（运行时创建）
+└── README_ZH.md        # 本文档
 ```
 
 ## API 端点
@@ -176,6 +175,3 @@ npm test
 - `LLOG_DATA_DIR` - 数据目录路径（默认：./data）
 - `NODE_ENV` - 环境（开发/生产）
 
-## 许可证
-
-MIT 许可证 - 详情请见 [LICENSE](LICENSE) 文件。

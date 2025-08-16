@@ -49,9 +49,7 @@ You can start the local server in two ways:
 
 **Option A: Using Pre-built Executable**
 1. Download the pre-built executable for your platform from the [Releases](https://github.com/your-username/llog/releases) page
-2. Run the executable:
-   - Windows: Double-click `my-node-service.exe`
-   - Linux/macOS: Run `./my-node-service` in terminal
+2. Run the executable
 3. Open `index.html` in your browser
 4. The app will automatically connect to the local server
 
@@ -112,26 +110,27 @@ If you want to build the project yourself:
    ```
    Or manually:
    ```bash
-   pkg server.js --targets node18-linux-x64 --output my-node-service
-   pkg server.js --targets node18-win-x64 --output my-node-service.exe
+   pkg server.js --targets node18-linux-x64 --output data_service
+   pkg server.js --targets node18-win-x64 --output data_service.exe
    ```
 
 ## Project Structure
 
 ```
-llog/
-├── index.html          # Frontend client application (main entry point)
-├── server.js           # Main server implementation
-├── start.sh            # Interactive startup script
-├── pack.sh             # Packaging script for executables
-├── ecosystem.config.js # PM2 configuration for production
-├── package.json        # Project dependencies and scripts
-├── test-server.js      # API testing suite
+LLog/
+├── app/                # Application directory
+│   ├── index.html      # Frontend client application (main entry point)
+│   ├── server.js       # Main server implementation
+│   ├── start.sh        # Interactive startup script
+│   ├── pack.sh         # Packaging script for executables
+│   ├── ecosystem.config.js # PM2 configuration for production
+│   ├── package.json    # Project dependencies and scripts
+│   └── test/           # Test directory
 ├── data/               # Data storage directory
 │   ├── llog_data.json  # Main data file
 │   ├── backups/        # Automatic backups
 │   └── exports/        # Exported data files
-└── logs/               # Server logs (created at runtime)
+└── README.md           # This file
 ```
 
 ## API Endpoints
@@ -176,6 +175,3 @@ Environment variables:
 - `LLOG_DATA_DIR` - Data directory path (default: ./data)
 - `NODE_ENV` - Environment (development/production)
 
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
