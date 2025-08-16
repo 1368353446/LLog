@@ -120,6 +120,8 @@ If you want to build the project yourself:
 LLog/
 ├── app/                # Application directory
 │   ├── index.html      # Frontend client application (main entry point)
+│   ├── styles.css      # CSS styles for the frontend
+│   ├── script.js       # JavaScript application logic
 │   ├── server.js       # Main server implementation
 │   ├── start.sh        # Interactive startup script
 │   ├── pack.sh         # Packaging script for executables

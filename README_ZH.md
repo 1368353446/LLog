@@ -120,6 +120,8 @@ LLog 可以通过两种方式使用：
 LLog/
 ├── app/                # 应用程序目录
 │   ├── index.html      # 前端客户端应用程序（主入口点）
+│   ├── styles.css      # 前端CSS样式
+│   ├── script.js       # 前端JavaScript应用逻辑
 │   ├── server.js       # 主服务器实现
 │   ├── start.sh        # 交互式启动脚本
 │   ├── pack.sh         # 可执行文件打包脚本
